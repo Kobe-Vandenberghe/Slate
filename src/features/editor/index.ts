@@ -4,6 +4,7 @@
  */
 export {
   colorFor,
+  copyForAi,
   copySelection,
   deleteSelection,
   deleteSelectionWithContents,

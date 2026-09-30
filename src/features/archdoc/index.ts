@@ -29,3 +29,5 @@ export {
 } from './model/edit'
 export { SUGGESTED_KINDS, SUGGESTED_PROPERTY_KEYS, collectVocabulary } from './model/vocabulary'
 export type { Vocabulary } from './model/vocabulary'
+export { projectForAi, renderAiYaml, scopeOf } from './model/project'
+export type { AiConnection, AiElement, AiProjection, AiStub, AiView } from './model/project'

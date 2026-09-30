@@ -49,6 +49,7 @@ const ICONS = {
   ),
   trash: <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />,
   download: <path d="M12 4v11M7 10l5 5 5-5M5 20h14" />,
+  ai: <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7z" />,
   upload: <path d="M12 15V4M7 9l5-5 5 5M5 20h14" />,
   trashFrame: (
     <>

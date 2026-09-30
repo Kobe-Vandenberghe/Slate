@@ -5,6 +5,7 @@ import { useEditingStore } from '@/features/text-editing'
 import { useToolStore } from '@/features/tools'
 import { STICKY_COLORS, createConnection } from '@/features/shapes'
 import {
+  copyForAi,
   copySelection,
   deleteSelection,
   deleteSelectionWithContents,
@@ -88,6 +89,23 @@ describe('editor commands', () => {
     expect(copy.from).toEqual({ element: copiedA.id })
     expect(copy.to).toMatchObject({ x: expect.any(Number), y: expect.any(Number) })
     expect(selected()).toEqual([copiedA.id, copy.id])
+  })
+
+  it('copies the selection, or the whole board, as AI YAML', async () => {
+    placeShape('rectangle', { x: 0, y: 0 })
+    placeShape('ellipse', { x: 300, y: 0 })
+    const [a, b] = shapes()
+    useDocumentStore.getState().update((d) => ({
+      ...d,
+      elements: d.elements.map((e) => (e.id === a.id ? { ...e, text: 'Orders API', kind: 'service' } : e)),
+      connections: [createConnection({ element: a.id }, { element: b.id }, 'link')],
+    }))
+    useSelectionStore.getState().select([a.id])
+    const slice = await copyForAi()
+    expect(slice).toContain('  n1:\n    text: Orders API\n    kind: service\n    connects:\n      - to: n2')
+    expect(slice).toContain('outside:\n  n2: {}')
+    useSelectionStore.getState().clear()
+    expect(await copyForAi()).not.toContain('outside:')
   })
 
   it('places frames at the back, drops new shapes into them, and deletes with or without contents', () => {

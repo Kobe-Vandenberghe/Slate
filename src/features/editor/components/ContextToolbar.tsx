@@ -6,6 +6,7 @@ import { useViewportStore, worldToScreen } from '@/features/viewport'
 import { clamp } from '@/shared/math'
 import { ColorSwatches, Icon, ToolButton } from '@/shared/ui'
 import {
+  copyForAi,
   deleteSelection,
   deleteSelectionWithContents,
   duplicateSelection,
@@ -54,6 +55,9 @@ export function ContextToolbar({ hidden }: { hidden: boolean }) {
     >
       <ColorSwatches colors={onlyStickies ? STICKY_COLORS : SHAPE_COLORS} onPick={recolorSelection} />
       <div className="divider vertical" />
+      <ToolButton size="small" title="Copy for AI (Ctrl+Shift+C)" onClick={() => void copyForAi()}>
+        <Icon name="ai" />
+      </ToolButton>
       <ToolButton size="small" title="Duplicate (Ctrl+D)" onClick={duplicateSelection}>
         <Icon name="duplicate" />
       </ToolButton>

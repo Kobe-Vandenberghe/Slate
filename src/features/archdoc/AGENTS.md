@@ -4,6 +4,9 @@
 - The ArchDoc v1 types (`ArchDoc`, `BoardElement`, `Connection`, …). Spec: `docs/archdoc.md`, ADR 0009.
 - Token vocabularies: `ELEMENT_SHAPES`, `COLOR_TOKENS`, `ARROW_HEADS`, `ALIAS_PATTERN`.
 - Validation + normalization (`parseArchDoc`) and the canonical writer (`serializeArchDoc`).
+- Meaning edits (`withKind`, `withAlias`, `withLabel`, `withProperty`, `withoutProperty`, `renameProperty`, `slugify`)
+  and autocomplete vocabulary (`collectVocabulary`).
+- The AI projection (`model/project.ts`): `scopeOf`, `projectForAi` (→ `{ view, refs }`), `renderAiYaml`.
 
 ## Public API
 See `index.ts`.
@@ -18,6 +21,10 @@ Nothing (not even `shared`). This is the lowest feature. It has no stores and no
 - `serializeArchDoc` output is canonical: `serialize(parse(serialize(doc))) === serialize(doc)`.
 - Key order in the serializer follows the tables in `docs/archdoc.md`. Change both together.
 - Any change to the format needs a spec update, tests and (once stored) a migration (skill `change-persisted-schema`).
+- The AI projection is derived and never stored. It has no geometry or style. Refs are aliases or temporary `n<k>`
+  handles that never collide with an alias. `refs` maps every ref (including `outside` stubs) back to an id.
+- `renderAiYaml` emits plain scalars only when YAML can't misread them, and JSON-quotes everything else
+  (numbers-as-text, yes/no, `:`, `,`, newlines, …). Keep new fields going through `scalar`.
 
 ## Gotchas
 - The element type is `BoardElement`, not `Element`, so it doesn't shadow the DOM `Element` type.

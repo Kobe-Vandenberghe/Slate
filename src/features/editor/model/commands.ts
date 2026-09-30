@@ -1,3 +1,4 @@
+import { ARCHDOC_SCHEMA, projectForAi, renderAiYaml } from '@/features/archdoc'
 import { useDocumentStore } from '@/features/document'
 import { getSelection, useSelectionStore } from '@/features/selection'
 import {
@@ -124,3 +125,15 @@ export function reorderSelection(toFront: boolean) {
 }
 
 export const zoomToContent = () => useViewportStore.getState().fitTo(diagramBounds(doc().diagram))
+
+/**
+ * Copies the selection (or, with nothing selected, the whole board) as the compact AI projection (YAML) and
+ * returns the text. Clipboard access is best-effort.
+ */
+export async function copyForAi(): Promise<string> {
+  const { board, diagram } = doc()
+  const ids = selectedIdSet()
+  const text = renderAiYaml(projectForAi({ schema: ARCHDOC_SCHEMA, board, ...diagram }, ids.size ? ids : undefined).view)
+  await globalThis.navigator?.clipboard?.writeText(text).catch(() => undefined)
+  return text
+}

@@ -123,7 +123,37 @@ Values are Slate tokens, never CSS or hex. The renderer maps a token to colors, 
 - Elements without an alias get temporary handles (`n1`, `n2`, …) for this projection only, mapped back when
   changes return.
 - AI changes are operations (add, update, remove, connect, move) that reference aliases or handles, applied as
-  one undo step.
+  one undo step. (Not built yet; the projection's `refs` map is the way back.)
+
+Implemented as `projectForAi(doc, ids?)` → `{ view, refs }` and `renderAiYaml(view)` in `src/features/archdoc`.
+In the app: **Copy for AI** (context toolbar, Ctrl+Shift+C) copies the selection, or the whole board with nothing
+selected. Scope rules: selecting a frame includes its children, every connection touching a covered element is
+included, and far ends outside the scope become `outside` stubs, including the frame of a lone child. Only the roles
+`sticky`, `text` and `frame` keep a `shape`. For the example below, with the frame selected:
+
+```yaml
+board: Orders platform
+properties: {owner: Team Checkout, version: "1.2"}
+elements:
+  checkout:
+    text: Checkout
+    kind: bounded-context
+    shape: frame
+  orders-api:
+    text: Orders API
+    kind: service
+    in: checkout
+    properties: {technology: .NET}
+    connects:
+      - to: orders-db
+        label: reads/writes
+        properties: {protocol: PostgreSQL}
+  orders-db:
+    text: Orders DB
+    kind: database
+    in: checkout
+    properties: {technology: PostgreSQL}
+```
 
 ## Example
 ```json

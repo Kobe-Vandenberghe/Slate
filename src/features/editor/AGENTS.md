@@ -4,7 +4,7 @@
 - **Editor commands** (`model/commands.ts`): plain functions for user-level actions that span stores.
   `placeShape`, `finishCreation`, `colorFor`, `withNewElement`, `duplicateSelection`, `copySelection`, `paste`,
   `deleteSelection` (releases frame contents), `deleteSelectionWithContents`, `selectAll`, `recolorSelection`,
-  `reorderSelection`, `zoomToContent`.
+  `reorderSelection`, `zoomToContent`, `copyForAi` (AI YAML of the selection or the whole board → clipboard).
 - The in-memory clipboard.
 - `ContextToolbar`: floats above the selection (colors, duplicate, bring to front/send to back, delete).
 
