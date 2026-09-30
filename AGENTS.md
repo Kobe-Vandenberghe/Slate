@@ -40,6 +40,7 @@ with no canvas library. This file is the **index**: start here, then open only t
 | How do I write code here (folders, naming, hooks, stores)? | `docs/CONVENTIONS.md` |
 | Colors, tokens, panels, buttons, icons | `docs/design-system.md` |
 | Stores, undo/redo, persistence, migrations | `docs/architecture/state.md` |
+| Board format / model language (ArchDoc) | `docs/archdoc.md` |
 | Why is it built this way? | `docs/adr/` (index in `docs/adr/README.md`) |
 | What did previous sessions do? | `docs/journal/` (newest file first) |
 | Rules for a specific feature | `src/features/<feature>/AGENTS.md` |
@@ -48,13 +49,15 @@ with no canvas library. This file is the **index**: start here, then open only t
 
 | Feature | Owns | Key exports |
 |---|---|---|
+| `src/features/archdoc` | ArchDoc v1 board model: types, tokens, validation, canonical JSON (pure, no UI) | `ArchDoc`, `parseArchDoc`, `serializeArchDoc` |
 | `src/features/shapes` | Shape model, catalog, palette, pure shape ops, geometry, shape rendering | `Shape`, `createShape`, `*Shapes` ops, `ShapeView` |
 | `src/features/viewport` | Camera (pan/zoom), coordinate conversion, Canvas surface, zoom UI | `useViewportStore`, `screenToWorld`, `Canvas` |
-| `src/features/document` | Persisted shapes + undo/redo, title, storage schema, top bar | `useDocumentStore`, `TopBar` |
+| `src/features/document` | The board as an in-memory ArchDoc (board + diagram), undo/redo, storage schema, `.slate.json` import/export, top bar | `useDocumentStore`, `exportBoard`, `TopBar` |
 | `src/features/tools` | Active tool, sticky color, tool rail | `useToolStore`, `Tool`, `Toolbar` |
-| `src/features/selection` | Selected ids, selection frame/handles, marquee box | `useSelectionStore`, `useSelectedShapes` |
+| `src/features/selection` | Selected ids (elements + connections), selection frame/handles, marquee box | `useSelectionStore`, `useSelection` |
 | `src/features/text-editing` | Which shape is being edited, in-place editor, commit | `useEditingStore`, `TextEditor` |
 | `src/features/editor` | Cross-store commands (place, delete, copy/paste, recolor, …), context toolbar | `placeShape`, `ContextToolbar` |
+| `src/features/inspector` | Right-hand panel for meaning: kind, alias, label, typed properties with autocomplete | `Inspector` |
 | `src/features/shape-library` | Library panel (stickies + shapes), drag-and-drop onto the canvas | `ShapeLibrary`, `useShapeDrop` |
 | `src/features/interaction` | Pointer state machine, keyboard shortcuts, space-to-pan | `usePointerInteractions` |
 
@@ -95,3 +98,4 @@ The shared layer (`src/shared/math`, `src/shared/ui`, `src/shared/styles`) holds
 | `session-wrap-up` | Finishing a task: journal, lessons, skill retro, verification |
 | `verify-ui-change` | Checking a visual or interaction change in the browser |
 | `write-skill` | A skill was wrong/incomplete, or a workflow repeated without a skill |
+| `archdoc-language` | Reading, generating or editing a board as ArchDoc (`.slate.json`, stored doc, AI YAML) |

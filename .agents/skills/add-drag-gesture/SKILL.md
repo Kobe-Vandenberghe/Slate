@@ -7,13 +7,13 @@ description: Add a new pointer interaction to the MiroClone canvas (connectors/a
 
 Everything lives in `src/features/interaction` unless noted. Read its `AGENTS.md` first.
 
-1. **Session type**: in `model/dragSession.ts`, add `XSession = { type: 'x', …, snapshot: Shape[] }`
-   (include `snapshot` if it edits shapes) and add it to the `DragSession` union.
+1. **Session type**: in `model/dragSession.ts`, add `XSession = { type: 'x', …, snapshot: Diagram }`
+   (include `snapshot` if it edits the board) and add it to the `DragSession` union.
 2. **Start it**: in `hooks/usePointerInteractions.ts` → `onPointerDown`, decide when the gesture begins
    (tool, modifier, hit target via `shapeIdAt` / `handleAt`). Call `begin(e, session)`. Order matters: pan checks come first.
 3. **Move**: add a `case 'x'` to `onPointerMove` that calls a `dragX(session, …)` helper.
    - Recompute from `session.snapshot` every time: `doc().update(() => op(session.snapshot, …), false)`.
-   - Put the geometry in a **pure op** in `src/features/shapes/model/` (tested), not in the hook.
+   - Put the geometry in a **pure diagram op** in `src/features/shapes/model/` (tested), not in the hook.
    - Call `setInteracting(true)` so floating UI hides.
 4. **Release**: add a `case 'x'` to `onPointerUp`. If shapes changed, call `doc().checkpoint(session.snapshot)`,
    which makes exactly one undo step.

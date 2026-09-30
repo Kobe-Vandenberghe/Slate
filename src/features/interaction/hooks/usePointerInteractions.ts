@@ -1,29 +1,32 @@
 import { useRef, useState } from 'react'
 import type { PointerEvent as ReactPointerEvent } from 'react'
 import { useDocumentStore } from '@/features/document'
-import { colorFor, finishCreation, placeShape } from '@/features/editor'
-import { getSelectedShapes, useSelectionStore } from '@/features/selection'
+import { colorFor, finishCreation, placeShape, withNewElement } from '@/features/editor'
+import { getSelection, useSelectionStore } from '@/features/selection'
 import {
-  boundsOf,
-  connectorEndAt,
-  createConnector,
+  assignFrames,
+  captureIntoFrame,
+  connectionEndAt,
+  createConnection,
   createShape,
-  isConnector,
-  pinConnectorEnds,
+  diagramBounds,
+  endElement,
+  idsInRect,
+  pinConnectionEnds,
   resizeBounds,
-  resizeShape,
-  rotateShapes,
-  scaleShapes,
-  setConnectorEnd,
-  shapeAABB,
+  resizeElement,
+  rotateDiagram,
+  scaleDiagram,
+  setConnectionEnd,
   snapRotation,
-  translateShapes,
+  translateDiagram,
+  worldElements,
 } from '@/features/shapes'
 import type { ResizeHandle } from '@/features/shapes'
 import { useEditingStore } from '@/features/text-editing'
 import { useToolStore } from '@/features/tools'
 import { panCamera, screenToWorld, useViewportStore } from '@/features/viewport'
-import { angleBetween, centerOf, dist, intersects, rectFromPoints } from '@/shared/math'
+import { angleBetween, centerOf, dist, rectFromPoints, toRadians } from '@/shared/math'
 import type { Bounds, Vec } from '@/shared/math'
 import { handleAt, isInsideTextEditor, shapeIdAt } from '../model/dom'
 import { CREATE_THRESHOLD, DOUBLE_CLICK_MS, DOUBLE_CLICK_SLOP, MOVE_THRESHOLD, SNAP_DISTANCE } from '../model/dragSession'
@@ -108,14 +111,14 @@ export function usePointerInteractions(spaceHeld: boolean) {
     }
 
     if (tool === 'connector') {
-      const snapshot = doc().shapes
-      const start = connectorEndAt(snapshot, world, snapDistance())
-      begin(e, { type: 'connect', startWorld: world, startScreen: screen, start, connectorId: null, snapshot })
+      const snapshot = doc().diagram
+      const from = connectionEndAt(worldElements(snapshot).ordered, world, snapDistance())
+      begin(e, { type: 'connect', startWorld: world, startScreen: screen, from, connectionId: null, snapshot })
       return
     }
 
     if (tool !== 'select') {
-      begin(e, { type: 'create', kind: tool, startWorld: world, startScreen: screen, shapeId: null, snapshot: doc().shapes })
+      begin(e, { type: 'create', shape: tool, startWorld: world, startScreen: screen, shapeId: null, snapshot: doc().diagram })
       return
     }
 
@@ -145,15 +148,16 @@ export function usePointerInteractions(spaceHeld: boolean) {
   }
 
   function startTransform(handle: string, world: Vec): ResizeSession | RotateSession | EndpointSession | null {
-    const selected = getSelectedShapes()
-    const bounds = boundsOf(selected)
+    const snapshot = doc().diagram
+    const { ids, elements, connections } = getSelection()
+    const bounds = diagramBounds(snapshot, ids)
     if (!bounds) return null
-    const single = selected.length === 1 ? selected[0] : null
-    const common = { ids: new Set(selected.map((s) => s.id)), snapshot: doc().shapes }
+    const single = ids.size === 1 && elements.length === 1 ? elements[0] : null
+    const common = { ids, snapshot }
 
-    if (handle === 'start' || handle === 'end') {
-      if (!single || !isConnector(single)) return null
-      return { type: 'endpoint', connectorId: single.id, which: handle, snapshot: common.snapshot }
+    if (handle === 'from' || handle === 'to') {
+      if (ids.size !== 1 || connections.length !== 1) return null
+      return { type: 'endpoint', connectionId: connections[0].id, which: handle, snapshot }
     }
 
     if (handle === 'rotate') {
@@ -162,11 +166,19 @@ export function usePointerInteractions(spaceHeld: boolean) {
         type: 'rotate',
         center,
         startAngle: angleBetween(center, world),
-        baseRotation: single?.rotation ?? 0,
+        baseRotation: toRadians(single?.rotation ?? 0),
         ...common,
       }
     }
-    return { type: 'resize', handle: handle as ResizeHandle, startWorld: world, bounds, single, ...common }
+    return {
+      type: 'resize',
+      handle: handle as ResizeHandle,
+      startWorld: world,
+      bounds,
+      // Resizing edits stored coordinates; the drag delta is the same in a frame's space.
+      single: single && snapshot.elements.find((e) => e.id === single.id)!,
+      ...common,
+    }
   }
 
   /** Press on a shape: update the selection (Shift toggles) and get ready to move it. */
@@ -183,7 +195,7 @@ export function usePointerInteractions(spaceHeld: boolean) {
       startWorld: world,
       startScreen: screen,
       ids: new Set(next),
-      snapshot: doc().shapes,
+      snapshot: doc().diagram,
       started: false,
     })
   }
@@ -232,29 +244,30 @@ export function usePointerInteractions(spaceHeld: boolean) {
     setInteracting(true)
     const dx = world.x - s.startWorld.x
     const dy = world.y - s.startWorld.y
-    doc().update(() => translateShapes(s.snapshot, s.ids, dx, dy), false)
+    doc().update(() => translateDiagram(s.snapshot, s.ids, dx, dy), false)
   }
 
   function dragResize(s: ResizeSession, world: Vec, keepAspect: boolean) {
     const delta = { x: world.x - s.startWorld.x, y: world.y - s.startWorld.y }
     doc().update(() => {
-      if (s.single) return resizeShape(s.snapshot, s.single, s.handle, delta, keepAspect)
+      const { single } = s
+      if (single) return resizeElement(s.snapshot, single, s.handle, delta, keepAspect)
       const next = resizeBounds(s.bounds, s.handle, delta.x, delta.y, keepAspect)
-      return scaleShapes(s.snapshot, s.ids, s.bounds, next)
+      return scaleDiagram(s.snapshot, s.ids, s.bounds, next)
     }, false)
   }
 
   function dragRotate(s: RotateSession, world: Vec, fineSnap: boolean) {
     const raw = s.baseRotation + angleBetween(s.center, world) - s.startAngle
     const delta = snapRotation(raw, fineSnap) - s.baseRotation
-    doc().update(() => rotateShapes(s.snapshot, s.ids, s.center, delta), false)
+    doc().update(() => rotateDiagram(s.snapshot, s.ids, s.center, delta), false)
   }
 
   function dragMarquee(s: MarqueeSession, world: Vec) {
     const rect = rectFromPoints(s.startWorld, world)
     setMarquee(rect)
     setInteracting(true)
-    const hits = doc().shapes.filter((shape) => intersects(rect, shapeAABB(shape))).map((shape) => shape.id)
+    const hits = idsInRect(doc().diagram, rect)
     useSelectionStore.getState().select([...new Set([...s.baseSelection, ...hits])])
   }
 
@@ -262,8 +275,8 @@ export function usePointerInteractions(spaceHeld: boolean) {
     if (!s.shapeId && dist(screen, s.startScreen) < CREATE_THRESHOLD) return
     const isNew = !s.shapeId
     s.shapeId ??= crypto.randomUUID()
-    const shape = createShape(s.kind, rectFromPoints(s.startWorld, world), colorFor(s.kind), s.shapeId)
-    doc().update(() => [...s.snapshot, shape], false)
+    const shape = createShape(s.shape, rectFromPoints(s.startWorld, world), colorFor(s.shape), s.shapeId)
+    doc().update(() => withNewElement(s.snapshot, shape), false)
     if (isNew) {
       useSelectionStore.getState().select([shape.id])
       setInteracting(true)
@@ -271,24 +284,24 @@ export function usePointerInteractions(spaceHeld: boolean) {
   }
 
   function dragConnect(s: ConnectSession, screen: Vec, world: Vec) {
-    if (!s.connectorId && dist(screen, s.startScreen) < CREATE_THRESHOLD) return
-    const isNew = !s.connectorId
-    s.connectorId ??= crypto.randomUUID()
-    const end = connectorEndAt(s.snapshot, world, snapDistance(), s.start.shapeId)
-    const connector = createConnector(s.start, end, colorFor('connector').stroke, s.connectorId)
-    doc().update(() => [...s.snapshot, connector], false)
+    if (!s.connectionId && dist(screen, s.startScreen) < CREATE_THRESHOLD) return
+    const isNew = !s.connectionId
+    s.connectionId ??= crypto.randomUUID()
+    const to = connectionEndAt(worldElements(s.snapshot).ordered, world, snapDistance(), endElement(s.from))
+    const connection = createConnection(s.from, to, s.connectionId)
+    doc().update(() => ({ ...s.snapshot, connections: [...s.snapshot.connections, connection] }), false)
     if (isNew) {
-      useSelectionStore.getState().select([connector.id])
+      useSelectionStore.getState().select([connection.id])
       setInteracting(true)
     }
   }
 
   function dragEndpoint(s: EndpointSession, world: Vec) {
-    const connector = s.snapshot.find((shape) => shape.id === s.connectorId)
-    const other = connector?.[s.which === 'start' ? 'end' : 'start']
-    const end = connectorEndAt(s.snapshot, world, snapDistance(), other?.shapeId)
+    const connection = s.snapshot.connections.find((c) => c.id === s.connectionId)
+    const other = connection?.[s.which === 'from' ? 'to' : 'from']
+    const end = connectionEndAt(worldElements(s.snapshot).ordered, world, snapDistance(), other && endElement(other))
     setInteracting(true)
-    doc().update(() => setConnectorEnd(s.snapshot, s.connectorId, s.which, end), false)
+    doc().update(() => setConnectionEnd(s.snapshot, s.connectionId, s.which, end), false)
   }
 
   // ---- pointer up ---------------------------------------------------------
@@ -305,12 +318,15 @@ export function usePointerInteractions(spaceHeld: boolean) {
         setPanning(false)
         break
       case 'move':
+        if (session.started) doc().update((d) => assignFrames(d, session.ids), false)
+        doc().checkpoint(session.snapshot)
+        break
       case 'resize':
       case 'rotate':
         doc().checkpoint(session.snapshot)
         break
       case 'endpoint':
-        doc().update((shapes) => pinConnectorEnds(shapes, session.connectorId), false)
+        doc().update((d) => pinConnectionEnds(d, session.connectionId), false)
         doc().checkpoint(session.snapshot)
         break
       case 'marquee':
@@ -318,18 +334,20 @@ export function usePointerInteractions(spaceHeld: boolean) {
         break
       case 'create':
         if (session.shapeId) {
+          const id = session.shapeId
+          if (session.shape === 'frame') doc().update((d) => captureIntoFrame(d, id), false)
           doc().checkpoint(session.snapshot)
-          finishCreation(session.shapeId, session.kind)
+          finishCreation(id, session.shape)
         } else {
-          placeShape(session.kind, session.startWorld)
+          placeShape(session.shape, session.startWorld)
         }
         break
       case 'connect':
-        if (session.connectorId) {
-          const id = session.connectorId
-          doc().update((shapes) => pinConnectorEnds(shapes, id), false)
+        if (session.connectionId) {
+          const id = session.connectionId
+          doc().update((d) => pinConnectionEnds(d, id), false)
           doc().checkpoint(session.snapshot)
-          finishCreation(session.connectorId, 'connector')
+          finishCreation(id)
         }
         break
     }

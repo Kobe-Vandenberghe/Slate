@@ -28,10 +28,15 @@ Nearly every feature (top of the graph): `document`, `editor`, `selection`, `sha
 - Keyboard shortcuts skip inputs and contentEditable (`isEditableTarget`). Ctrl+C without a selection falls
   through to the browser.
 - A move only starts past `MOVE_THRESHOLD` px, so plain clicks never create undo steps.
-- Connector gestures find the target shape geometrically (`connectorEndAt` on the snapshot), not via `e.target`:
-  pointer capture retargets events to the canvas, and the arrow being drawn sits under the cursor.
-- Ends snap within `SNAP_DISTANCE` screen px (divide by zoom). On release, `pinConnectorEnds` runs *before*
+- Connection gestures find the target element geometrically (`connectionEndAt` on the snapshot's elements), not via
+  `e.target`: pointer capture retargets events to the canvas, and the arrow being drawn sits under the cursor.
+- Ends snap within `SNAP_DISTANCE` screen px (divide by zoom). On release, `pinConnectionEnds` runs *before*
   `checkpoint` so floating ends become fixed anchors in the same undo step.
+- Drag sessions snapshot the whole `diagram`, and every preview is `op(snapshot, …)` from `shapes` diagram ops.
+- Frames: releasing a move runs `assignFrames` (drop into / drag out of a frame) before `checkpoint`, and releasing
+  a drawn frame runs `captureIntoFrame`. Both land in the same undo step. Resize edits the *stored* element
+  (`resizeElement`), and rotation centers come from the world view.
+- Geometric lookups (`connectionEndAt`) take `worldElements(snapshot).ordered`, never `snapshot.elements`.
 
 ## Tests
 No direct tests (DOM-heavy). The logic it calls is tested in `shapes`, `document` and `editor`.

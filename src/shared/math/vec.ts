@@ -17,8 +17,10 @@ export function rotatePoint(p: Vec, center: Vec, angle: number): Vec {
   return { x: center.x + dx * cos - dy * sin, y: center.y + dx * sin + dy * cos }
 }
 
-/** Wraps an angle into [0, 2π). */
-export function normalizeAngle(a: number) {
-  const full = Math.PI * 2
-  return ((a % full) + full) % full
+/** Wraps an angle in degrees into [0, 360). */
+export function normalizeDegrees(a: number) {
+  return ((a % 360) + 360) % 360
 }
+
+export const toRadians = (degrees: number) => (degrees * Math.PI) / 180
+export const toDegrees = (radians: number) => (radians * 180) / Math.PI

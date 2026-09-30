@@ -39,6 +39,7 @@ Content palettes live in code, not CSS: `SHAPE_COLORS` and `STICKY_COLORS` in `@
 | Left edge, centered | Toolbar | tools |
 | Right of toolbar | ShapeLibrary | shape-library |
 | Above or below the selection | ContextToolbar | editor |
+| Right edge, below the top | Inspector (single selection) | inspector |
 | Bottom-right | ZoomControls | viewport |
 | Bottom-left | ShortcutHint | app |
 
@@ -47,3 +48,5 @@ Content palettes live in code, not CSS: `SHAPE_COLORS` and `STICKY_COLORS` in `@
 - Selection: 1.5 px accent frame, 9 px square handles, round rotate knob on a 26 px stem (all screen px, divided by zoom).
 - Sticky notes: square paper, contact shadow plus a "lifted" `::after` shadow. Text is centered, 16 px.
 - Text boxes: 22 px, left-aligned, auto-height.
+- Frames: white area with a 1 px divider border; bold muted title above the top-left edge (the only clickable part),
+  kind in small caps next to it. Default 480 × 320. Always behind their children.

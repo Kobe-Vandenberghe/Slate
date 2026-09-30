@@ -1,0 +1,47 @@
+// Test fixture: the example board from docs/archdoc.md, as raw JSON input.
+export const exampleJson = () => ({
+  schema: 1,
+  board: { title: 'Orders platform', properties: { owner: 'Team Checkout', version: '1.2' } },
+  elements: [
+    { id: 'f_Ck91', alias: 'checkout', shape: 'frame', text: 'Checkout', kind: 'bounded-context', x: 0, y: 0, w: 800, h: 500 },
+    {
+      id: 'e_7Kq2',
+      alias: 'orders-api',
+      shape: 'rounded',
+      text: 'Orders API',
+      kind: 'service',
+      properties: { technology: '.NET' },
+      frame: 'f_Ck91',
+      x: 40,
+      y: 60,
+      w: 160,
+      h: 100,
+      style: { fill: 'blue', icon: 'dotnet' },
+    },
+    {
+      id: 'e_Db33',
+      alias: 'orders-db',
+      shape: 'cylinder',
+      text: 'Orders DB',
+      kind: 'database',
+      properties: { technology: 'PostgreSQL' },
+      frame: 'f_Ck91',
+      x: 420,
+      y: 50,
+      w: 110,
+      h: 140,
+    },
+    { id: 'e_St44', shape: 'sticky', text: 'Latency spikes at 9am', x: 1000, y: 260, w: 180, h: 180, rotation: 3, style: { fill: 'yellow' } },
+  ],
+  connections: [
+    {
+      id: 'c_p0Za',
+      from: { element: 'e_7Kq2', anchor: [1, 0.5] },
+      to: { element: 'e_Db33' },
+      label: 'reads/writes',
+      properties: { protocol: 'PostgreSQL' },
+      waypoints: [[300, 110]],
+    },
+    { id: 'c_Fr02', from: { element: 'f_Ck91' }, to: { x: 1300, y: 400 }, style: { arrows: 'both' } },
+  ],
+})

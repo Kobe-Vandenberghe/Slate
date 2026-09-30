@@ -5,7 +5,7 @@ const MAX_LENGTH = 80
 
 /** Inline-editable board name; mirrored into the browser tab title. */
 export function BoardTitle() {
-  const title = useDocumentStore((s) => s.title)
+  const title = useDocumentStore((s) => s.board.title)
   const setTitle = useDocumentStore((s) => s.setTitle)
 
   useEffect(() => {

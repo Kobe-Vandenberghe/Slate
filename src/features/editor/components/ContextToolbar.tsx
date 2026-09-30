@@ -1,11 +1,14 @@
-import { SHAPE_COLORS, STICKY_COLORS, boundsOf } from '@/features/shapes'
-import { useSelectedShapes } from '@/features/selection'
+import { useDocumentStore } from '@/features/document'
+import { SHAPE_COLORS, STICKY_COLORS, diagramBounds, isFrame } from '@/features/shapes'
+import { useSelection } from '@/features/selection'
 import { useEditingStore } from '@/features/text-editing'
 import { useViewportStore, worldToScreen } from '@/features/viewport'
 import { clamp } from '@/shared/math'
 import { ColorSwatches, Icon, ToolButton } from '@/shared/ui'
 import {
+  copyForAi,
   deleteSelection,
+  deleteSelectionWithContents,
   duplicateSelection,
   recolorSelection,
   reorderSelection,
@@ -24,12 +27,13 @@ const EDGE_MARGIN = 200
  * `hidden` is set (the app hides it during drags).
  */
 export function ContextToolbar({ hidden }: { hidden: boolean }) {
-  const selected = useSelectedShapes()
+  const selection = useSelection()
+  const diagram = useDocumentStore((s) => s.diagram)
   const editingId = useEditingStore((s) => s.editingId)
   const camera = useViewportStore((s) => s.camera)
   const viewportWidth = useViewportStore((s) => s.size.w)
 
-  const bounds = boundsOf(selected)
+  const bounds = diagramBounds(diagram, selection.ids)
   if (!bounds || editingId || hidden) return null
 
   const topLeft = worldToScreen(bounds, camera)
@@ -38,7 +42,9 @@ export function ContextToolbar({ hidden }: { hidden: boolean }) {
   const above = topLeft.y > MIN_SPACE_ABOVE
   const x = clamp(topLeft.x + width / 2, EDGE_MARGIN, viewportWidth - EDGE_MARGIN)
   const y = above ? topLeft.y - GAP_ABOVE : topLeft.y + height + GAP_BELOW
-  const onlyStickies = selected.every((s) => s.kind === 'sticky')
+  const onlyStickies =
+    !selection.connections.length && selection.elements.every((s) => s.shape === 'sticky')
+  const hasFrame = selection.elements.some(isFrame)
 
   return (
     <div
@@ -49,6 +55,9 @@ export function ContextToolbar({ hidden }: { hidden: boolean }) {
     >
       <ColorSwatches colors={onlyStickies ? STICKY_COLORS : SHAPE_COLORS} onPick={recolorSelection} />
       <div className="divider vertical" />
+      <ToolButton size="small" title="Copy for AI (Ctrl+Shift+C)" onClick={() => void copyForAi()}>
+        <Icon name="ai" />
+      </ToolButton>
       <ToolButton size="small" title="Duplicate (Ctrl+D)" onClick={duplicateSelection}>
         <Icon name="duplicate" />
       </ToolButton>
@@ -58,9 +67,14 @@ export function ContextToolbar({ hidden }: { hidden: boolean }) {
       <ToolButton size="small" title="Send to back ([)" onClick={() => reorderSelection(false)}>
         <Icon name="sendToBack" />
       </ToolButton>
-      <ToolButton size="small" title="Delete (Del)" onClick={deleteSelection}>
+      <ToolButton size="small" title={hasFrame ? 'Delete, keep contents (Del)' : 'Delete (Del)'} onClick={deleteSelection}>
         <Icon name="trash" />
       </ToolButton>
+      {hasFrame && (
+        <ToolButton size="small" title="Delete with contents (Shift+Del)" onClick={deleteSelectionWithContents}>
+          <Icon name="trashFrame" />
+        </ToolButton>
+      )}
     </div>
   )
 }

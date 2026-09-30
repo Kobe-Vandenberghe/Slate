@@ -13,7 +13,8 @@ Do not rewrite history. Use skill `write-adr`.
 | [0005-camera-convention.md](0005-camera-convention.md) | Camera: `screen = (world + cam) × z`, one CSS transform | Accepted |
 | [0006-feature-sliced-structure.md](0006-feature-sliced-structure.md) | Feature slices with enforced public barrels | Accepted |
 | [0007-versioned-local-persistence.md](0007-versioned-local-persistence.md) | localStorage with a versioned schema + migrations | Accepted |
-| [0008-connectors-as-shapes.md](0008-connectors-as-shapes.md) | Connectors are shapes, laid out by the document store | Accepted |
+| [0008-connectors-as-shapes.md](0008-connectors-as-shapes.md) | Connectors are shapes, laid out by the document store | Superseded by 0009 |
+| [0009-archdoc-canonical-model.md](0009-archdoc-canonical-model.md) | ArchDoc is the canonical board model | Accepted |
 
 ## Template
 

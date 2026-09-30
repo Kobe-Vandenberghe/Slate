@@ -1,4 +1,4 @@
-import { ORIGIN, centerOf, rotatePoint } from '@/shared/math'
+import { ORIGIN, centerOf, rotatePoint, toRadians } from '@/shared/math'
 import type { Bounds, Vec } from '@/shared/math'
 import type { ResizeHandle, Shape } from './types'
 
@@ -41,14 +41,15 @@ export function resizeBounds(
 
 /** Resizes a single shape in its own rotated frame, keeping the opposite side pinned in world space. */
 export function resizeRotated(s: Shape, handle: ResizeHandle, delta: Vec, keepAspect: boolean): Bounds {
-  const local = rotatePoint(delta, ORIGIN, -s.rotation)
+  const angle = toRadians(s.rotation)
+  const local = rotatePoint(delta, ORIGIN, -angle)
   const next = resizeBounds(s, handle, local.x, local.y, keepAspect)
-  if (!s.rotation) return next
+  if (!angle) return next
   // Rotating around the new center would shift the pinned side; translate by (I - R)(c0 - c1) to undo that.
   const c0 = centerOf(s)
   const c1 = centerOf(next)
   const d = { x: c0.x - c1.x, y: c0.y - c1.y }
-  const rd = rotatePoint(d, ORIGIN, s.rotation)
+  const rd = rotatePoint(d, ORIGIN, angle)
   return { ...next, x: next.x + d.x - rd.x, y: next.y + d.y - rd.y }
 }
 
@@ -56,7 +57,7 @@ const FINE_STEP = Math.PI / 12
 const MAGNET_STEP = Math.PI / 4
 const MAGNET_RANGE = (5 * Math.PI) / 180
 
-/** Snaps an absolute rotation: pulls toward 45° multiples, or locks to 15° steps when `fine` is set. */
+/** Snaps an absolute rotation in radians: pulls toward 45° multiples, or locks to 15° steps when `fine` is set. */
 export function snapRotation(angle: number, fine: boolean): number {
   if (fine) return Math.round(angle / FINE_STEP) * FINE_STEP
   const magnet = Math.round(angle / MAGNET_STEP) * MAGNET_STEP

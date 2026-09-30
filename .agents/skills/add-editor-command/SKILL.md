@@ -5,12 +5,14 @@ description: Add a user-level action to MiroClone (e.g. lock, group, align, flip
 
 # Add an editor command
 
-1. **Pure op first** (if it changes shapes): add a function to `src/features/shapes/model/shapeOps.ts`.
-   - Signature: `(shapes: Shape[], ids: ReadonlySet<string>, …) => Shape[]`.
-   - Return the **same array** when nothing changes.
-   - Export it from `src/features/shapes/index.ts` and test it in `shapeOps.test.ts`.
+1. **Pure op first** (if it changes the board): add a diagram op to `src/features/shapes/model/diagram.ts`.
+   - Signature: `(d: Diagram, ids: ReadonlySet<string>, …) => Diagram`. `ids` may hold element *and* connection ids.
+   - Element-only logic can live in `shapeOps.ts` as `(shapes, ids, …) => Shape[]`, lifted with `mapElements(d, fn)`.
+   - Return the **same diagram / array** when nothing changes.
+   - Export it from `src/features/shapes/index.ts` and test it in `diagram.test.ts` / `shapeOps.test.ts`.
 2. **Command**: add a plain function to `src/features/editor/model/commands.ts`.
-   - Read state with `useXStore.getState()`. Use one `doc().update(...)` so it is one undo step.
+   - Read state with `useXStore.getState()` and the selection with `getSelection()`. Use one `doc().update((d) => …)`
+     so it is one undo step.
    - Export it from `src/features/editor/index.ts`.
 3. **Test**: add a case to `src/features/editor/model/commands.test.ts` (stores are reset in `beforeEach`).
    Check the result and that `undo()` reverts it.

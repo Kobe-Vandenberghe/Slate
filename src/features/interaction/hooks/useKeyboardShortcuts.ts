@@ -1,15 +1,17 @@
 import { useEffect } from 'react'
-import { useDocumentStore } from '@/features/document'
+import { exportBoard, useDocumentStore } from '@/features/document'
 import {
+  copyForAi,
   copySelection,
   deleteSelection,
+  deleteSelectionWithContents,
   duplicateSelection,
   paste,
   reorderSelection,
   selectAll,
   zoomToContent,
 } from '@/features/editor'
-import { getSelectedShapes, useSelectionStore } from '@/features/selection'
+import { getSelection, useSelectionStore } from '@/features/selection'
 import { useEditingStore } from '@/features/text-editing'
 import { TOOL_SHORTCUTS, useToolStore } from '@/features/tools'
 import { useViewportStore } from '@/features/viewport'
@@ -26,8 +28,9 @@ function modifiedCommand(key: string, shift: boolean): (() => void) | undefined 
     y: redo,
     a: selectAll,
     d: duplicateSelection,
-    c: copySelection,
+    c: shift ? () => void copyForAi() : copySelection,
     v: paste,
+    s: exportBoard,
     '=': () => viewport.zoomBy(ZOOM_STEP),
     '+': () => viewport.zoomBy(ZOOM_STEP),
     '-': () => viewport.zoomBy(1 / ZOOM_STEP),
@@ -38,8 +41,8 @@ function modifiedCommand(key: string, shift: boolean): (() => void) | undefined 
 
 /**
  * Global keyboard shortcuts (ignored while typing in inputs/text editors):
- * - Ctrl/⌘: Z undo, Shift+Z / Y redo, A select all, C/V copy/paste, D duplicate, +/−/0 zoom
- * - Delete/Backspace delete, Enter edit text, Escape deselect, ] / [ front/back, Shift+1 fit
+ * - Ctrl/⌘: Z undo, Shift+Z / Y redo, A select all, C/V copy/paste, Shift+C copy for AI, D duplicate, S save as .slate.json, +/−/0 zoom
+ * - Delete/Backspace delete (Shift: frames with their contents), Enter edit text, Escape deselect, ] / [ front/back, Shift+1 fit
  * - Tool keys from `TOOL_SHORTCUTS`. Space-to-pan lives in `useSpaceHeld`.
  */
 export function useKeyboardShortcuts() {
@@ -50,8 +53,8 @@ export function useKeyboardShortcuts() {
 
       if (e.ctrlKey || e.metaKey) {
         const command = modifiedCommand(key, e.shiftKey)
-        // Leave native copy alone when nothing on the board is selected.
-        if (!command || (key === 'c' && !getSelectedShapes().length)) return
+        // Leave native copy alone when nothing on the board is selected (Shift+C copies the whole board for AI).
+        if (!command || (key === 'c' && !e.shiftKey && !getSelection().ids.size)) return
         e.preventDefault()
         command()
         return
@@ -61,17 +64,18 @@ export function useKeyboardShortcuts() {
         case 'Delete':
         case 'Backspace':
           e.preventDefault()
-          deleteSelection()
+          if (e.shiftKey) deleteSelectionWithContents()
+          else deleteSelection()
           return
         case 'Escape':
           useSelectionStore.getState().clear()
           useToolStore.getState().setTool('select')
           return
         case 'Enter': {
-          const selected = getSelectedShapes()
-          if (selected.length !== 1) return
+          const { ids, elements } = getSelection()
+          if (ids.size !== 1 || elements.length !== 1) return
           e.preventDefault()
-          useEditingStore.getState().startEditing(selected[0].id)
+          useEditingStore.getState().startEditing(elements[0].id)
           return
         }
         case ']':

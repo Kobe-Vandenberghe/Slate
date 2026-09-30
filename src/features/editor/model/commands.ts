@@ -1,17 +1,23 @@
+import { ARCHDOC_SCHEMA, projectForAi, renderAiYaml } from '@/features/archdoc'
 import { useDocumentStore } from '@/features/document'
-import { getSelectedShapes, useSelectionStore } from '@/features/selection'
+import { getSelection, useSelectionStore } from '@/features/selection'
 import {
   DEFAULT_SHAPE_COLOR,
-  boundsOf,
-  cloneShapes,
+  EMPTY_DIAGRAM,
+  assignFrames,
+  childrenOf,
+  cloneDiagram,
   createShape,
+  diagramBounds,
+  extractSelection,
+  isFrame,
   opensEditorOnCreate,
   placementBounds,
-  recolorShapes,
-  removeShapes,
-  reorderShapes,
+  recolorDiagram,
+  removeFromDiagram,
+  reorderDiagram,
 } from '@/features/shapes'
-import type { PaletteColor, Shape, ShapeKind } from '@/features/shapes'
+import type { Diagram, PaletteColor, Shape, ShapeType } from '@/features/shapes'
 import { useEditingStore } from '@/features/text-editing'
 import { useToolStore } from '@/features/tools'
 import { useViewportStore } from '@/features/viewport'
@@ -24,43 +30,62 @@ import type { Vec } from '@/shared/math'
 
 const PASTE_OFFSET = 20
 
-let clipboard: Shape[] = []
+/** A self-contained copy of the selection (see `extractSelection`). */
+let clipboard: Diagram = EMPTY_DIAGRAM
 
 const doc = () => useDocumentStore.getState()
-const selectedIdSet = () => new Set(useSelectionStore.getState().selectedIds)
+const selectedIdSet = () => getSelection().ids
 
-/** Color a newly created shape of `kind` gets. */
-export const colorFor = (kind: ShapeKind): PaletteColor =>
-  kind === 'sticky' ? useToolStore.getState().stickyColor : DEFAULT_SHAPE_COLOR
+/** Color a newly created shape of `type` gets. */
+export const colorFor = (type: ShapeType): PaletteColor =>
+  type === 'sticky' ? useToolStore.getState().stickyColor : DEFAULT_SHAPE_COLOR
 
-/** Selects a just-created shape, opens its editor if it's text-first, and returns to the select tool. */
-export function finishCreation(id: string, kind: ShapeKind) {
-  if (opensEditorOnCreate(kind)) useEditingStore.getState().startEditing(id)
+/**
+ * Selects a just-created element or connection, opens the editor for text-first shapes, and returns to the
+ * select tool. `type` is omitted for connections.
+ */
+export function finishCreation(id: string, type?: ShapeType) {
+  if (type && opensEditorOnCreate(type)) useEditingStore.getState().startEditing(id)
   else useSelectionStore.getState().select([id])
   useToolStore.getState().setTool('select')
 }
 
-/** Adds a default-sized shape at world point `at` (one undo step). */
-export function placeShape(kind: ShapeKind, at: Vec, color: PaletteColor = colorFor(kind)) {
-  const shape = createShape(kind, placementBounds(kind, at), color)
-  doc().update((shapes) => [...shapes, shape])
-  finishCreation(shape.id, kind)
+/**
+ * Adds a new element placed in world coordinates: frames go to the back of the board, anything else joins the
+ * frame it lands in. Pure, so gestures can reuse it on their snapshot.
+ */
+export function withNewElement(d: Diagram, shape: Shape): Diagram {
+  if (isFrame(shape)) return { ...d, elements: [shape, ...d.elements] }
+  return assignFrames({ ...d, elements: [...d.elements, shape] }, new Set([shape.id]))
 }
 
-function insertCopies(source: Shape[]) {
-  if (!source.length) return []
-  const copies = cloneShapes(source, PASTE_OFFSET)
-  doc().update((shapes) => [...shapes, ...copies])
-  useSelectionStore.getState().select(copies.map((c) => c.id))
+/** Adds a default-sized shape at world point `at` (one undo step). */
+export function placeShape(type: ShapeType, at: Vec, color: PaletteColor = colorFor(type)) {
+  const shape = createShape(type, placementBounds(type, at), color)
+  doc().update((d) => withNewElement(d, shape))
+  finishCreation(shape.id, type)
+}
+
+function insertCopies(source: Diagram): Diagram {
+  if (!source.elements.length && !source.connections.length) return source
+  const copies = cloneDiagram(source, PASTE_OFFSET)
+  const ids = [...copies.elements, ...copies.connections].map((x) => x.id)
+  doc().update((d) =>
+    assignFrames(
+      { elements: [...d.elements, ...copies.elements], connections: [...d.connections, ...copies.connections] },
+      new Set(ids),
+    ),
+  )
+  useSelectionStore.getState().select(ids)
   return copies
 }
 
 export const duplicateSelection = () => {
-  insertCopies(getSelectedShapes())
+  insertCopies(extractSelection(doc().diagram, selectedIdSet()))
 }
 
 export const copySelection = () => {
-  clipboard = getSelectedShapes()
+  clipboard = extractSelection(doc().diagram, selectedIdSet())
 }
 
 /** Pastes the clipboard offset from the originals; repeated pastes cascade. */
@@ -68,23 +93,47 @@ export const paste = () => {
   clipboard = insertCopies(clipboard)
 }
 
+/** Deletes the selection. Children of a deleted frame stay on the board. */
 export function deleteSelection() {
   const ids = selectedIdSet()
   if (!ids.size) return
-  doc().update((shapes) => removeShapes(shapes, ids))
+  doc().update((d) => removeFromDiagram(d, ids))
   useSelectionStore.getState().clear()
 }
 
-export const selectAll = () => useSelectionStore.getState().select(doc().shapes.map((s) => s.id))
+/** Deletes the selection including everything inside selected frames. */
+export function deleteSelectionWithContents() {
+  const ids = selectedIdSet()
+  if (!ids.size) return
+  doc().update((d) => removeFromDiagram(d, new Set([...ids, ...childrenOf(d, ids)])))
+  useSelectionStore.getState().clear()
+}
+
+export function selectAll() {
+  const { elements, connections } = doc().diagram
+  useSelectionStore.getState().select([...elements, ...connections].map((x) => x.id))
+}
 
 export function recolorSelection(color: PaletteColor) {
   const ids = selectedIdSet()
-  doc().update((shapes) => recolorShapes(shapes, ids, color))
+  doc().update((d) => recolorDiagram(d, ids, color.token))
 }
 
 export function reorderSelection(toFront: boolean) {
   const ids = selectedIdSet()
-  doc().update((shapes) => reorderShapes(shapes, ids, toFront))
+  doc().update((d) => reorderDiagram(d, ids, toFront))
 }
 
-export const zoomToContent = () => useViewportStore.getState().fitTo(boundsOf(doc().shapes))
+export const zoomToContent = () => useViewportStore.getState().fitTo(diagramBounds(doc().diagram))
+
+/**
+ * Copies the selection (or, with nothing selected, the whole board) as the compact AI projection (YAML) and
+ * returns the text. Clipboard access is best-effort.
+ */
+export async function copyForAi(): Promise<string> {
+  const { board, diagram } = doc()
+  const ids = selectedIdSet()
+  const text = renderAiYaml(projectForAi({ schema: ARCHDOC_SCHEMA, board, ...diagram }, ids.size ? ids : undefined).view)
+  await globalThis.navigator?.clipboard?.writeText(text).catch(() => undefined)
+  return text
+}

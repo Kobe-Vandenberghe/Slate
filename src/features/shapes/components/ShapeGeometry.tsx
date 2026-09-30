@@ -1,11 +1,11 @@
-import type { ShapeKind } from '../model/types'
+import type { ShapeType } from '../model/types'
 
 type Point = [number, number]
 
 const points = (list: Point[]) => list.map(([x, y]) => `${x},${y}`).join(' ')
 
 type ShapeGeometryProps = {
-  kind: ShapeKind
+  type: ShapeType
   w: number
   h: number
   fill: string
@@ -14,10 +14,10 @@ type ShapeGeometryProps = {
 }
 
 /**
- * SVG outline for a shape kind in local coordinates (0,0)–(w,h).
+ * SVG outline for a shape type in local coordinates (0,0)–(w,h).
  * Paths use the real size (not a scaled viewBox) so strokes never distort.
  */
-export function ShapeGeometry({ kind, w, h, fill, stroke, strokeWidth = 2 }: ShapeGeometryProps) {
+export function ShapeGeometry({ type, w, h, fill, stroke, strokeWidth = 2 }: ShapeGeometryProps) {
   // Inset by half the stroke so the outline stays inside the box.
   const p = strokeWidth / 2
   const right = w - p
@@ -26,7 +26,9 @@ export function ShapeGeometry({ kind, w, h, fill, stroke, strokeWidth = 2 }: Sha
   const innerH = Math.max(h - strokeWidth, 0)
   const paint = { fill, stroke, strokeWidth, strokeLinejoin: 'round' as const }
 
-  switch (kind) {
+  switch (type) {
+    // Frames get their own look in stage 4; until then they draw as a plain box.
+    case 'frame':
     case 'rectangle':
       return <rect x={p} y={p} width={innerW} height={innerH} {...paint} />
 
@@ -111,7 +113,6 @@ export function ShapeGeometry({ kind, w, h, fill, stroke, strokeWidth = 2 }: Sha
       return <rect x={0} y={0} width={w} height={h} rx={2} fill={fill} />
 
     case 'text':
-    case 'connector':
       return null
   }
 }

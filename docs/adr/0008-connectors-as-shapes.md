@@ -1,6 +1,6 @@
 # 0008. Connectors are shapes, laid out by the document store
 
-- Status: Accepted
+- Status: Superseded by 0009
 - Date: 2026-09-30
 
 ## Context

@@ -14,7 +14,7 @@ export function ShapePreview({ item }: { item: CatalogItem }) {
   return (
     <svg width={PREVIEW_W} height={PREVIEW_H} viewBox={`0 0 ${PREVIEW_W} ${PREVIEW_H}`} aria-hidden>
       <g transform={`translate(${(PREVIEW_W - w) / 2} ${(PREVIEW_H - h) / 2})`}>
-        <ShapeGeometry kind={item.kind} w={w} h={h} fill="#fff" stroke="#1e1e1e" strokeWidth={1.5} />
+        <ShapeGeometry type={item.shape} w={w} h={h} fill="#fff" stroke="#1e1e1e" strokeWidth={1.5} />
       </g>
     </svg>
   )

@@ -19,8 +19,8 @@ export function useShapeDrop() {
     const rect = e.currentTarget.getBoundingClientRect()
     const screen = { x: e.clientX - rect.left, y: e.clientY - rect.top }
     const at = screenToWorld(screen, useViewportStore.getState().camera)
-    const color = (data.kind === 'sticky' && findStickyColor(data.colorName)) || colorFor(data.kind)
-    placeShape(data.kind, at, color)
+    const color = (data.type === 'sticky' && findStickyColor(data.colorName)) || colorFor(data.type)
+    placeShape(data.type, at, color)
   }
 
   return { onDragOver, onDrop }

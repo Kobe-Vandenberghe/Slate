@@ -26,7 +26,7 @@ Only create the subfolders you need. `npm run check:agents` checks that `index.t
 | Thing | Convention | Example |
 |---|---|---|
 | Store hook | `use<Domain>Store` | `useDocumentStore` |
-| Pure list op | verb + `Shapes` | `translateShapes`, `recolorShapes` |
+| Pure list op | verb + `Shapes` (elements) / `Diagram` (elements + connections) | `translateShapes`, `recolorDiagram` |
 | Command (editor) | verb + object | `deleteSelection`, `placeShape` |
 | Component file | PascalCase, one component per file | `ContextToolbar.tsx` |
 | Constants | `SCREAMING_SNAKE_CASE`, named (no magic numbers) | `MOVE_THRESHOLD` |

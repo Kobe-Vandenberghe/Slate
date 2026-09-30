@@ -1,4 +1,4 @@
-import { centerOf, rotatePoint } from '@/shared/math'
+import { centerOf, rotatePoint, toRadians } from '@/shared/math'
 import type { Bounds } from '@/shared/math'
 import type { Shape } from './types'
 
@@ -11,7 +11,7 @@ export function shapeAABB(s: Shape): Bounds {
     { x: s.x + s.w, y: s.y },
     { x: s.x + s.w, y: s.y + s.h },
     { x: s.x, y: s.y + s.h },
-  ].map((p) => rotatePoint(p, c, s.rotation))
+  ].map((p) => rotatePoint(p, c, toRadians(s.rotation)))
   const xs = corners.map((p) => p.x)
   const ys = corners.map((p) => p.y)
   const x = Math.min(...xs)
