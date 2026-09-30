@@ -40,6 +40,7 @@ with no canvas library. This file is the **index**: start here, then open only t
 | How do I write code here (folders, naming, hooks, stores)? | `docs/CONVENTIONS.md` |
 | Colors, tokens, panels, buttons, icons | `docs/design-system.md` |
 | Stores, undo/redo, persistence, migrations | `docs/architecture/state.md` |
+| Board format / model language (ArchDoc) | `docs/archdoc.md` |
 | Why is it built this way? | `docs/adr/` (index in `docs/adr/README.md`) |
 | What did previous sessions do? | `docs/journal/` (newest file first) |
 | Rules for a specific feature | `src/features/<feature>/AGENTS.md` |
