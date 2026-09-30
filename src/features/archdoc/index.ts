@@ -17,4 +17,4 @@ export { ALIAS_PATTERN, ARROW_HEADS, COLOR_TOKENS, ELEMENT_SHAPES, isElementShap
 export type { ArrowHeads, ColorToken, ElementShape } from './model/tokens'
 export { parseArchDoc } from './model/parse'
 export type { ParseResult } from './model/parse'
-export { serializeArchDoc } from './model/serialize'
+export { canonicalArchDoc, serializeArchDoc } from './model/serialize'

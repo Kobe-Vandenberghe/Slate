@@ -60,16 +60,18 @@ function connectionOut(c: Connection): Json {
   return out
 }
 
-/** The canonical ArchDoc JSON: fixed key order, defaults omitted, numbers rounded, trailing newline. */
-export function serializeArchDoc(doc: ArchDoc): string {
+/** The canonical ArchDoc as a plain object: fixed key order, defaults omitted, numbers rounded. */
+export function canonicalArchDoc(doc: ArchDoc) {
   const board: Json = { title: doc.board.title }
   const boardProperties = propertiesOut(doc.board.properties)
   if (boardProperties) board.properties = boardProperties
-  const out = {
+  return {
     schema: doc.schema,
     board,
     elements: doc.elements.map(elementOut),
     connections: doc.connections.map(connectionOut),
   }
-  return `${JSON.stringify(out, null, 2)}\n`
 }
+
+/** The canonical ArchDoc JSON text (2-space indent, trailing newline). */
+export const serializeArchDoc = (doc: ArchDoc) => `${JSON.stringify(canonicalArchDoc(doc), null, 2)}\n`

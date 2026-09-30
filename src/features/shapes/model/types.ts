@@ -1,8 +1,8 @@
-import type { ColorToken, ElementShape, ElementStyle } from '@/features/archdoc'
+import type { BoardElement, ColorToken, ElementShape } from '@/features/archdoc'
 import type { Vec } from '@/shared/math'
 
-/** How a shape is drawn. Frames arrive with stage 4; connectors leave the list in stage 2b (ADR 0009). */
-export type ShapeType = Exclude<ElementShape, 'frame'> | 'connector'
+/** How a shape is drawn. Connectors leave the shape list in stage 2b-2 (ADR 0009). */
+export type ShapeType = ElementShape | 'connector'
 
 /**
  * One end of a connector. `x/y` is always the resolved world point; `shapeId` binds it to a shape.
@@ -11,19 +11,13 @@ export type ShapeType = Exclude<ElementShape, 'frame'> | 'connector'
  */
 export type ConnectorEnd = { x: number; y: number; shapeId?: string; anchor?: Vec }
 
-/** A single item on the board, in world units. `x/y/w/h` describe the unrotated box. */
-export type Shape = {
-  id: string
+/**
+ * A single item on the board, in world units: an ArchDoc `BoardElement` (see docs/archdoc.md), or a connector
+ * until connectors move to their own list. `x/y/w/h` describe the unrotated box, `rotation` is in degrees and
+ * `style` holds color tokens (resolve with `shapeColors`).
+ */
+export type Shape = Omit<BoardElement, 'shape'> & {
   shape: ShapeType
-  x: number
-  y: number
-  w: number
-  h: number
-  /** Degrees, clockwise around the shape's center. */
-  rotation: number
-  text: string
-  /** Color tokens; resolve to real colors with `shapeColors`. Absent = the shape's default look. */
-  style?: ElementStyle
   /** Connectors only. `x/y/w/h` of a connector is derived from its ends (see `syncConnectors`). */
   start?: ConnectorEnd
   end?: ConnectorEnd

@@ -27,6 +27,8 @@ export function ShapeGeometry({ type, w, h, fill, stroke, strokeWidth = 2 }: Sha
   const paint = { fill, stroke, strokeWidth, strokeLinejoin: 'round' as const }
 
   switch (type) {
+    // Frames get their own look in stage 4; until then they draw as a plain box.
+    case 'frame':
     case 'rectangle':
       return <rect x={p} y={p} width={innerW} height={innerH} {...paint} />
 

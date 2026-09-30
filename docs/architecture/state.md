@@ -4,7 +4,7 @@ All app state lives in Zustand stores (ADR 0003), one store per feature. Each st
 
 | Store | Feature | State | Persisted |
 |---|---|---|---|
-| `useDocumentStore` | document | `shapes`, `past`, `future`, `title` | shapes + title (localStorage) |
+| `useDocumentStore` | document | `shapes`, `past`, `future`, `board` | whole board as ArchDoc (localStorage) |
 | `useSelectionStore` | selection | `selectedIds` | no |
 | `useToolStore` | tools | `tool`, `stickyColor` | no |
 | `useEditingStore` | text-editing | `editingId` | no |
@@ -45,10 +45,12 @@ History is capped at 200 steps.
 
 ## Persistence
 
-- `document/model/storage.ts`. Keys: `miroclone:board` (shapes) and `miroclone:title`.
+- `document/model/storage.ts`. Key: `miroclone:board` (the whole board, including the title). `miroclone:title` is legacy.
 - The store subscribes and saves on change. Writes are best-effort, and storage failures are ignored.
 - Format: `{ version: SCHEMA_VERSION, shapes }`. `parseStoredShapes` migrates older data step by step via
   `MIGRATIONS[n]` (n → n+1). Version 0 = the legacy bare array without `rotation`. Version 2 added connectors, version 3 connector `anchor`s,
-  version 4 renamed `kind` → `shape`, replaced hex `fill`/`stroke` with `style` color tokens and switched rotation to degrees.
+  version 4 renamed `kind` → `shape`, replaced hex `fill`/`stroke` with `style` color tokens and switched rotation to degrees,
+  version 5 stores `{ version, doc }` with a canonical ArchDoc (connectors → `connections`, title → `board.title`).
+  Loaded boards are validated with `parseArchDoc`; an invalid one is backed up to `miroclone:board:corrupt`.
 - **Changing `Shape`:** bump `SCHEMA_VERSION`, add `MIGRATIONS[old]`, add a test in `storage.test.ts`
   (skill `change-persisted-schema`).
