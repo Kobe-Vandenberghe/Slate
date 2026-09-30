@@ -57,6 +57,7 @@ with no canvas library. This file is the **index**: start here, then open only t
 | `src/features/selection` | Selected ids (elements + connections), selection frame/handles, marquee box | `useSelectionStore`, `useSelection` |
 | `src/features/text-editing` | Which shape is being edited, in-place editor, commit | `useEditingStore`, `TextEditor` |
 | `src/features/editor` | Cross-store commands (place, delete, copy/paste, recolor, …), context toolbar | `placeShape`, `ContextToolbar` |
+| `src/features/inspector` | Right-hand panel for meaning: kind, alias, label, typed properties with autocomplete | `Inspector` |
 | `src/features/shape-library` | Library panel (stickies + shapes), drag-and-drop onto the canvas | `ShapeLibrary`, `useShapeDrop` |
 | `src/features/interaction` | Pointer state machine, keyboard shortcuts, space-to-pan | `usePointerInteractions` |
 

@@ -31,6 +31,7 @@ export {
   EMPTY_DIAGRAM,
   cloneDiagram,
   diagramBounds,
+  editItem,
   extractSelection,
   idsInRect,
   mapElements,

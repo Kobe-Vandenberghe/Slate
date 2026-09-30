@@ -18,3 +18,14 @@ export type { ArrowHeads, ColorToken, ElementShape } from './model/tokens'
 export { parseArchDoc } from './model/parse'
 export type { ParseResult } from './model/parse'
 export { canonicalArchDoc, serializeArchDoc } from './model/serialize'
+export {
+  renameProperty,
+  slugify,
+  withAlias,
+  withKind,
+  withLabel,
+  withProperty,
+  withoutProperty,
+} from './model/edit'
+export { SUGGESTED_KINDS, SUGGESTED_PROPERTY_KEYS, collectVocabulary } from './model/vocabulary'
+export type { Vocabulary } from './model/vocabulary'

@@ -92,6 +92,23 @@ export function recolorDiagram(d: Diagram, ids: Ids, token: ColorToken): Diagram
 export const reorderDiagram = (d: Diagram, ids: Ids, toFront: boolean) =>
   withLists(d, reorderShapes(d.elements, ids, toFront), reorderShapes(d.connections, ids, toFront))
 
+/** The fields a meaning edit may touch; elements and connections share `properties`. */
+type Meaningful = { id: string; kind?: string; alias?: string; label?: string; properties?: Connection['properties'] }
+
+/**
+ * Applies a meaning edit (e.g. `withKind`, `withProperty` from `@/features/archdoc`) to the element or
+ * connection with `id`. Returns the same diagram when the edit is a no-op.
+ */
+export function editItem(d: Diagram, id: string, fn: <T extends Meaningful>(item: T) => T): Diagram {
+  const edit = <T extends Meaningful>(list: T[]) => {
+    const i = list.findIndex((x) => x.id === id)
+    if (i < 0) return list
+    const next = fn(list[i])
+    return next === list[i] ? list : list.with(i, next)
+  }
+  return withLists(d, edit(d.elements), edit(d.connections))
+}
+
 /**
  * The selected part of a diagram as a self-contained diagram: ends attached to unselected elements become free
  * points where they currently are. Used for copy/duplicate.

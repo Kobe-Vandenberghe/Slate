@@ -85,3 +85,33 @@
 .connector-head {
   pointer-events: fill;
 }
+
+/* Centered on the line; the canvas-colored halo keeps it readable over the line and grid. */
+.connector-label {
+  font-size: 13px;
+  fill: var(--color-ink-muted);
+  text-anchor: middle;
+  dominant-baseline: central;
+  paint-order: stroke;
+  stroke: var(--color-canvas);
+  stroke-width: 5px;
+  stroke-linejoin: round;
+  pointer-events: all;
+}
+
+/* The element's kind (meaning), small and quiet in the top-left corner. */
+.shape-kind {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  max-width: calc(100% - 16px);
+  overflow: hidden;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--color-ink-faint);
+  pointer-events: none;
+}

@@ -21,7 +21,7 @@ Features from lowest to highest. A feature may import only features listed above
 | 2 | `document`, `tools` |
 | 3 | `selection` |
 | 4 | `text-editing` |
-| 5 | `editor` (cross-store commands) |
+| 5 | `editor` (cross-store commands), `inspector` (meaning panel) |
 | 6 | `shape-library`, `interaction` |
 | — | `app` composes everything |
 
@@ -40,17 +40,18 @@ subgraph 2["features"]
 3["archdoc"]
 4["document"]
 5["editor"]
-6["interaction"]
-7["selection"]
-8["shape-library"]
-9["shapes"]
-A["text-editing"]
-B["tools"]
-C["viewport"]
+6["inspector"]
+7["interaction"]
+8["selection"]
+9["shape-library"]
+A["shapes"]
+B["text-editing"]
+C["tools"]
+D["viewport"]
 end
-subgraph D["shared"]
-E["math"]
-F["ui"]
+subgraph E["shared"]
+F["math"]
+G["ui"]
 end
 end
 1-->4
@@ -58,46 +59,51 @@ end
 1-->6
 1-->7
 1-->8
-1-->A
+1-->9
 1-->B
 1-->C
-1-->9
-4-->F
+1-->D
+1-->A
+4-->G
 4-->3
-4-->9
+4-->A
 5-->4
-5-->7
-5-->9
+5-->8
 5-->A
-5-->C
-5-->E
-5-->F
 5-->B
-6-->4
-6-->5
-6-->7
-6-->A
-6-->B
-6-->C
-6-->9
-6-->E
+5-->D
+5-->F
+5-->G
+5-->C
 6-->3
-7-->E
+6-->4
+6-->8
+6-->A
 7-->4
-7-->9
+7-->5
+7-->8
+7-->B
+7-->C
+7-->D
+7-->A
+7-->F
 7-->3
-8-->9
-8-->B
-8-->5
-8-->C
-9-->3
-9-->E
-A-->4
-A-->7
-A-->9
-B-->F
-B-->9
-C-->E
+8-->F
+8-->4
+8-->A
+8-->3
+9-->A
+9-->C
+9-->5
+9-->D
+A-->3
+A-->F
+B-->4
+B-->8
+B-->A
+C-->G
+C-->A
+D-->F
 ```
 
 <!-- graph:end -->
@@ -114,6 +120,7 @@ Whiteboard (app)
 ├── Toolbar (tools)                 select / hand / text / arrow / library toggle
 ├── ShapeLibrary (shape-library)    StickyNotePicker + ShapeGrid (click or drag)
 ├── ContextToolbar (editor)         floats above the selection: colors, duplicate, order, delete
+├── Inspector (inspector)           right panel: kind, alias, label, properties of the single selected item
 ├── ZoomControls (viewport)
 └── ShortcutHint (app)
 ```

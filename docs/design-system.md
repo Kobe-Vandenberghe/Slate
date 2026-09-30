@@ -39,6 +39,7 @@ Content palettes live in code, not CSS: `SHAPE_COLORS` and `STICKY_COLORS` in `@
 | Left edge, centered | Toolbar | tools |
 | Right of toolbar | ShapeLibrary | shape-library |
 | Above or below the selection | ContextToolbar | editor |
+| Right edge, below the top | Inspector (single selection) | inspector |
 | Bottom-right | ZoomControls | viewport |
 | Bottom-left | ShortcutHint | app |
 

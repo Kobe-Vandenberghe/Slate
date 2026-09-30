@@ -45,6 +45,11 @@ export const ConnectionView = memo(function ConnectionView({ connection, path }:
       <line className="connector-hit" x1={ax} y1={ay} x2={bx} y2={by} strokeWidth={HIT_WIDTH} />
       <line x1={ax} y1={ay} x2={lx} y2={ly} stroke={stroke} strokeWidth={STROKE_WIDTH} />
       <polygon className="connector-head" points={`${bx},${by} ${wing(1)} ${wing(-1)}`} fill={stroke} />
+      {connection.label && (
+        <text className="connector-label" x={(ax + bx) / 2} y={(ay + by) / 2}>
+          {connection.label}
+        </text>
+      )}
     </svg>
   )
 })

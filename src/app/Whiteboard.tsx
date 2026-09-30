@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ContextToolbar, zoomToContent } from '@/features/editor'
 import { TopBar } from '@/features/document'
+import { Inspector } from '@/features/inspector'
 import { cursorFor, useKeyboardShortcuts, usePointerInteractions, useSpaceHeld } from '@/features/interaction'
 import { MarqueeBox, SelectionOverlay } from '@/features/selection'
 import { ShapeLibrary, useShapeDrop } from '@/features/shape-library'
@@ -39,6 +40,7 @@ export function Whiteboard() {
       <Toolbar libraryOpen={libraryOpen} onToggleLibrary={() => setLibraryOpen((open) => !open)} />
       {libraryOpen && <ShapeLibrary />}
       <ContextToolbar hidden={pointer.interacting} />
+      <Inspector hidden={pointer.interacting} />
       <ZoomControls onFit={zoomToContent} />
       <ShortcutHint />
     </>

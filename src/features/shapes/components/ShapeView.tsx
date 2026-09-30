@@ -53,6 +53,7 @@ export const ShapeView = memo(function ShapeView({ shape, editor, onMeasureHeigh
       <div className="shape-content" style={isText ? { color: stroke } : undefined}>
         {editor ?? <div className="shape-label">{shape.text}</div>}
       </div>
+      {shape.kind && !isText && <div className="shape-kind">{shape.kind}</div>}
     </div>
   )
 })

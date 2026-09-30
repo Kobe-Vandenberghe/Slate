@@ -3,6 +3,7 @@ import { createConnection } from './connections'
 import {
   cloneDiagram,
   diagramBounds,
+  editItem,
   extractSelection,
   idsInRect,
   recolorDiagram,
@@ -80,6 +81,17 @@ describe('diagram ops', () => {
     expect(copy.elements[0].id).not.toBe('a')
     expect(copy.connections[0].from).toEqual({ element: copy.elements[0].id })
     expect(copy.connections[0].to).toEqual({ x: 320, y: 45 })
+  })
+
+  it('edits the meaning of an element or a connection by id', () => {
+    const next = editItem(d, 'a', (item) => ({ ...item, kind: 'service' }))
+    expect(next.elements[0]).toMatchObject({ kind: 'service' })
+    expect(next.connections).toBe(d.connections)
+    const labelled = editItem(d, 'link', (item) => ({ ...item, label: 'calls' }))
+    expect(labelled.connections[0]).toMatchObject({ label: 'calls' })
+    expect(labelled.elements).toBe(d.elements)
+    expect(editItem(d, 'a', (item) => item)).toBe(d)
+    expect(editItem(d, 'missing', (item) => ({ ...item, kind: 'x' }))).toBe(d)
   })
 
   it('computes bounds over elements and connection paths, and marquee hits', () => {
