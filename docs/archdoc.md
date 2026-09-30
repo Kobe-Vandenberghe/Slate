@@ -3,7 +3,8 @@
 ArchDoc is a machine-readable representation of a software architecture diagram that preserves both
 **what the architecture means** and **how the user arranged it**. It is the source of truth for a board;
 the canvas is one view of it. Decision record: [ADR 0009](adr/0009-archdoc-canonical-model.md).
-Implementation: `src/features/archdoc` (`parseArchDoc`, `serializeArchDoc`).
+Implementation: `src/features/archdoc` (`parseArchDoc`, `serializeArchDoc`). Files use the `.slate.json` extension and
+contain exactly the canonical form (top bar: open/save, Ctrl+S).
 
 ## Principles
 1. **Source of truth.** A board can be rebuilt exactly from its ArchDoc (Canvas → ArchDoc → Canvas is lossless).

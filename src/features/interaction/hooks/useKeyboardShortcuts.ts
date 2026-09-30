@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useDocumentStore } from '@/features/document'
+import { exportBoard, useDocumentStore } from '@/features/document'
 import {
   copySelection,
   deleteSelection,
@@ -29,6 +29,7 @@ function modifiedCommand(key: string, shift: boolean): (() => void) | undefined 
     d: duplicateSelection,
     c: copySelection,
     v: paste,
+    s: exportBoard,
     '=': () => viewport.zoomBy(ZOOM_STEP),
     '+': () => viewport.zoomBy(ZOOM_STEP),
     '-': () => viewport.zoomBy(1 / ZOOM_STEP),
@@ -39,7 +40,7 @@ function modifiedCommand(key: string, shift: boolean): (() => void) | undefined 
 
 /**
  * Global keyboard shortcuts (ignored while typing in inputs/text editors):
- * - Ctrl/⌘: Z undo, Shift+Z / Y redo, A select all, C/V copy/paste, D duplicate, +/−/0 zoom
+ * - Ctrl/⌘: Z undo, Shift+Z / Y redo, A select all, C/V copy/paste, D duplicate, S save as .slate.json, +/−/0 zoom
  * - Delete/Backspace delete (Shift: frames with their contents), Enter edit text, Escape deselect, ] / [ front/back, Shift+1 fit
  * - Tool keys from `TOOL_SHORTCUTS`. Space-to-pan lives in `useSpaceHeld`.
  */

@@ -52,7 +52,7 @@ with no canvas library. This file is the **index**: start here, then open only t
 | `src/features/archdoc` | ArchDoc v1 board model: types, tokens, validation, canonical JSON (pure, no UI) | `ArchDoc`, `parseArchDoc`, `serializeArchDoc` |
 | `src/features/shapes` | Shape model, catalog, palette, pure shape ops, geometry, shape rendering | `Shape`, `createShape`, `*Shapes` ops, `ShapeView` |
 | `src/features/viewport` | Camera (pan/zoom), coordinate conversion, Canvas surface, zoom UI | `useViewportStore`, `screenToWorld`, `Canvas` |
-| `src/features/document` | The board as an in-memory ArchDoc (board + diagram), undo/redo, storage schema, top bar | `useDocumentStore`, `TopBar` |
+| `src/features/document` | The board as an in-memory ArchDoc (board + diagram), undo/redo, storage schema, `.slate.json` import/export, top bar | `useDocumentStore`, `exportBoard`, `TopBar` |
 | `src/features/tools` | Active tool, sticky color, tool rail | `useToolStore`, `Tool`, `Toolbar` |
 | `src/features/selection` | Selected ids (elements + connections), selection frame/handles, marquee box | `useSelectionStore`, `useSelection` |
 | `src/features/text-editing` | Which shape is being edited, in-place editor, commit | `useEditingStore`, `TextEditor` |
