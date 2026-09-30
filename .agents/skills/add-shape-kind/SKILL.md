@@ -13,7 +13,7 @@ All steps are inside `src/features/shapes` unless noted. The field is `shape` an
 2. **Catalog**: add `{ shape, label, w, h }` to `SHAPE_CATALOG` in `model/catalog.ts`. `w/h` = the default click-to-place size.
    It then appears in the library grid automatically. Skip this for non-library shapes (like `text`/`sticky`) and extend `defaultSize` instead.
 3. **Geometry**: add a `case` to `components/ShapeGeometry.tsx`, and mirror its outline in `outline()` in
-   `model/connectors.ts` so arrows snap to the right edge.
+   `model/connections.ts` so arrows snap to the right edge.
    - Draw in local coordinates `(0,0)–(w,h)` from the real `w/h`. Inset by `p = strokeWidth / 2`
      (use the `right`, `bottom`, `innerW`, `innerH` helpers).
    - Spread `{...paint}` so fill, stroke and joins match the other shapes.

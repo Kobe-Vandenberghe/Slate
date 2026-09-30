@@ -63,14 +63,15 @@ end
 1-->C
 1-->9
 4-->F
+4-->3
 4-->9
+5-->4
 5-->7
 5-->9
 5-->A
 5-->C
 5-->E
 5-->F
-5-->4
 5-->B
 6-->4
 6-->5
@@ -80,13 +81,16 @@ end
 6-->C
 6-->9
 6-->E
+6-->3
 7-->E
-7-->9
 7-->4
+7-->9
+7-->3
 8-->9
 8-->B
 8-->5
 8-->C
+9-->3
 9-->E
 A-->4
 A-->7
@@ -103,7 +107,7 @@ C-->E
 ```
 Whiteboard (app)
 ├── Canvas (viewport)               dot grid + camera-transformed world layer; wheel pan/zoom
-│   ├── BoardShapes (app)           ShapeView (shapes) ×N, TextEditor (text-editing) for the edited shape
+│   ├── BoardShapes (app)           ShapeView (shapes) ×N, TextEditor for the edited element, then ConnectionView ×N on top
 │   ├── SelectionOverlay (selection) frame, resize handles, rotate knob
 │   └── MarqueeBox (selection)
 ├── TopBar (document)               brand, BoardTitle, undo/redo
@@ -120,7 +124,7 @@ Whiteboard (app)
 flowchart LR
   input["Pointer / keyboard / drop<br/>(interaction, shape-library)"] --> session["Drag session<br/>(interaction/model)"]
   input --> commands["Editor commands<br/>(editor)"]
-  session -->|"update(fn, false)"| doc[("documentStore<br/>shapes + history")]
+  session -->|"update(fn, false)"| doc[("documentStore<br/>board + diagram + history")]
   session -->|"checkpoint(snapshot)"| doc
   commands -->|"update(fn)"| doc
   commands --> sel[("selectionStore")]
@@ -130,10 +134,14 @@ flowchart LR
   doc --> render["BoardShapes / SelectionOverlay<br/>ContextToolbar"]
   sel --> render
   cam --> render
-  doc -->|subscribe| storage["localStorage<br/>(versioned)"]
+  doc -->|subscribe| storage["localStorage<br/>(versioned ArchDoc)"]
 ```
 
-- **Pure core:** `shapes/model/shapeOps.ts` computes every shape change. Stores only apply its results.
+- **The model is the source of truth:** the document store holds an ArchDoc (`docs/archdoc.md`, ADR 0009):
+  `board` plus `diagram = { elements, connections }`. The canvas only renders it.
+- **Pure core:** `shapes/model/shapeOps.ts` (element lists) and `shapes/model/diagram.ts` (elements + connections)
+  compute every change. Stores only apply their results.
+- **Derived, never stored:** connection end points (`connectionPaths(diagram)`, cached per diagram object).
 - **Gestures** start from a snapshot, recompute the preview on each move and commit one undo step when released.
 
 ## Coordinate systems
@@ -148,5 +156,6 @@ flowchart LR
 
 Each shape is an absolutely positioned `div` containing an SVG outline and an HTML label (ADR 0002). The browser
 therefore handles text layout, editing and hit-testing. The DOM hooks are `data-shape-id` on shapes,
-`data-handle` on handles (`n`…`sw`, `rotate`, and `start`/`end` on a selected connector) and `data-text-editor` on the editor.
-Connectors (arrows) are `shape: 'connector'` shapes drawn by `ConnectorView` as an SVG line (ADR 0008).
+`data-handle` on handles (`n`…`sw`, `rotate`, and `from`/`to` on a selected connection) and `data-text-editor` on the editor.
+Connections (arrows) are a separate list drawn above all elements by `ConnectionView` as an SVG line, from their
+derived path (ADR 0009). The SVG carries the connection id in `data-shape-id`, so hit-testing treats both alike.

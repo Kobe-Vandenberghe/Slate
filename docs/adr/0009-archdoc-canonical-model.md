@@ -25,7 +25,7 @@ Connectors-as-shapes (0008) mixes relationships into the shape list and stores d
 - Derived views (AI, Mermaid) are one-way projections and never persisted.
 
 ## Consequences
-- Supersedes 0008. `syncConnectors` becomes a derivation over the document instead of a write-back.
+- Supersedes 0008. `syncConnectors` is gone: end points are derived by `connectionPaths(diagram)`.
 - Every op that moves elements must also move connection waypoints and free ends (and those of connections
   inside a moved frame).
 - Connections always render above elements (a behavior change).

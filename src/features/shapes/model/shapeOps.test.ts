@@ -48,11 +48,9 @@ describe('shapeOps', () => {
     expect(reorderShapes(list, new Set(['c']), false).map((s) => s.id)).toEqual(['c', 'a', 'b'])
   })
 
-  it('recolors the fill token and resets the outline; connectors get a line color', () => {
-    const connector = shape('c', { shape: 'connector' })
-    const [a, c] = recolorShapes([shape('a', { style: { fill: 'red', stroke: 'black', icon: 'x' } }), connector], new Set(['a', 'c']), 'blue')
+  it('recolors the fill token and resets the outline', () => {
+    const [a] = recolorShapes([shape('a', { style: { fill: 'red', stroke: 'black', icon: 'x' } })], new Set(['a']), 'blue')
     expect(a.style).toEqual({ fill: 'blue', icon: 'x' })
-    expect(c.style).toEqual({ stroke: 'blue' })
   })
 
   it('removes text shapes whose text is emptied', () => {

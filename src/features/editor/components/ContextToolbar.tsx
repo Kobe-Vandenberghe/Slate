@@ -1,5 +1,6 @@
-import { SHAPE_COLORS, STICKY_COLORS, boundsOf } from '@/features/shapes'
-import { useSelectedShapes } from '@/features/selection'
+import { useDocumentStore } from '@/features/document'
+import { SHAPE_COLORS, STICKY_COLORS, diagramBounds } from '@/features/shapes'
+import { useSelection } from '@/features/selection'
 import { useEditingStore } from '@/features/text-editing'
 import { useViewportStore, worldToScreen } from '@/features/viewport'
 import { clamp } from '@/shared/math'
@@ -24,12 +25,13 @@ const EDGE_MARGIN = 200
  * `hidden` is set (the app hides it during drags).
  */
 export function ContextToolbar({ hidden }: { hidden: boolean }) {
-  const selected = useSelectedShapes()
+  const selection = useSelection()
+  const diagram = useDocumentStore((s) => s.diagram)
   const editingId = useEditingStore((s) => s.editingId)
   const camera = useViewportStore((s) => s.camera)
   const viewportWidth = useViewportStore((s) => s.size.w)
 
-  const bounds = boundsOf(selected)
+  const bounds = diagramBounds(diagram, selection.ids)
   if (!bounds || editingId || hidden) return null
 
   const topLeft = worldToScreen(bounds, camera)
@@ -38,7 +40,8 @@ export function ContextToolbar({ hidden }: { hidden: boolean }) {
   const above = topLeft.y > MIN_SPACE_ABOVE
   const x = clamp(topLeft.x + width / 2, EDGE_MARGIN, viewportWidth - EDGE_MARGIN)
   const y = above ? topLeft.y - GAP_ABOVE : topLeft.y + height + GAP_BELOW
-  const onlyStickies = selected.every((s) => s.shape === 'sticky')
+  const onlyStickies =
+    !selection.connections.length && selection.elements.every((s) => s.shape === 'sticky')
 
   return (
     <div

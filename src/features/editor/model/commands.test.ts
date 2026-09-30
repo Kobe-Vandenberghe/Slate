@@ -3,7 +3,7 @@ import { useDocumentStore } from '@/features/document'
 import { useSelectionStore } from '@/features/selection'
 import { useEditingStore } from '@/features/text-editing'
 import { useToolStore } from '@/features/tools'
-import { STICKY_COLORS } from '@/features/shapes'
+import { STICKY_COLORS, createConnection } from '@/features/shapes'
 import {
   copySelection,
   deleteSelection,
@@ -14,11 +14,12 @@ import {
   selectAll,
 } from './commands'
 
-const shapes = () => useDocumentStore.getState().shapes
+const shapes = () => useDocumentStore.getState().diagram.elements
+const connections = () => useDocumentStore.getState().diagram.connections
 const selected = () => useSelectionStore.getState().selectedIds
 
 beforeEach(() => {
-  useDocumentStore.setState({ shapes: [], past: [], future: [] })
+  useDocumentStore.setState({ diagram: { elements: [], connections: [] }, past: [], future: [] })
   useSelectionStore.setState({ selectedIds: [] })
   useEditingStore.setState({ editingId: null })
   useToolStore.setState({ tool: 'rectangle', stickyColor: STICKY_COLORS[0] })
@@ -71,5 +72,34 @@ describe('editor commands', () => {
     expect(shapes().at(-1)?.id).toBe(first.id)
     selectAll()
     expect(selected()).toHaveLength(2)
+  })
+
+  it('duplicates connections with their elements and detaches ends to uncopied elements', () => {
+    placeShape('rectangle', { x: 0, y: 0 })
+    placeShape('ellipse', { x: 300, y: 0 })
+    const [a, b] = shapes()
+    const link = createConnection({ element: a.id }, { element: b.id }, 'link')
+    useDocumentStore.getState().update((d) => ({ ...d, connections: [link] }))
+    useSelectionStore.getState().select([a.id, 'link'])
+    duplicateSelection()
+    const [, copy] = connections()
+    const [, , copiedA] = shapes()
+    expect(copy.from).toEqual({ element: copiedA.id })
+    expect(copy.to).toMatchObject({ x: expect.any(Number), y: expect.any(Number) })
+    expect(selected()).toEqual([copiedA.id, copy.id])
+  })
+
+  it('deleting an element keeps connections, detached where they were, and undo restores both', () => {
+    placeShape('rectangle', { x: 0, y: 0 })
+    placeShape('ellipse', { x: 300, y: 0 })
+    const [a, b] = shapes()
+    useDocumentStore.getState().update((d) => ({ ...d, connections: [createConnection({ element: a.id }, { element: b.id }, 'link')] }))
+    useSelectionStore.getState().select([b.id])
+    deleteSelection()
+    expect(shapes()).toHaveLength(1)
+    expect(connections()[0].to).not.toHaveProperty('element')
+    useDocumentStore.getState().undo()
+    expect(shapes()).toHaveLength(2)
+    expect(connections()[0].to).toEqual({ element: b.id })
   })
 })

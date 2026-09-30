@@ -1,10 +1,10 @@
 import { create } from 'zustand'
+import { ARCHDOC_SCHEMA } from '@/features/archdoc'
 import type { Board } from '@/features/archdoc'
-import { syncConnectors } from '@/features/shapes'
-import type { Shape } from '@/features/shapes'
-import { fromArchDoc, toArchDoc } from '../model/archdocAdapter'
+import { EMPTY_DIAGRAM } from '@/features/shapes'
+import type { Diagram } from '@/features/shapes'
 import { historyReducer } from '../model/history'
-import type { HistoryAction, HistoryState, ShapesUpdater } from '../model/history'
+import type { DiagramUpdater, HistoryAction, HistoryState } from '../model/history'
 import { loadBoard, saveBoard } from '../model/storage'
 
 export const DEFAULT_TITLE = 'Untitled board'
@@ -13,27 +13,26 @@ type DocumentState = HistoryState & {
   /** Board-level data: title and properties (not part of undo). */
   board: Board
   /**
-   * Apply a change to the shapes. `record: false` = transient (mid-drag); pair it with
+   * Apply a change to the diagram. `record: false` = transient (mid-drag); pair it with
    * `checkpoint(snapshotTakenBeforeTheDrag)` on release so the gesture is one undo step.
    */
-  update: (fn: ShapesUpdater, record?: boolean) => void
-  checkpoint: (snapshot: Shape[]) => void
+  update: (fn: DiagramUpdater, record?: boolean) => void
+  checkpoint: (snapshot: Diagram) => void
   undo: () => void
   redo: () => void
   setTitle: (title: string) => void
 }
 
-/** The persisted board: shapes, undo/redo history and board data. Saved as an ArchDoc. */
+/** The board as an in-memory ArchDoc: `board` + `diagram` (elements, connections), with undo/redo. */
 export const useDocumentStore = create<DocumentState>()((set) => {
   const dispatch = (action: HistoryAction) => set((s) => historyReducer(s, action))
   const stored = loadBoard()
   return {
-    shapes: syncConnectors(stored ? fromArchDoc(stored) : []),
+    diagram: stored ? { elements: stored.elements, connections: stored.connections } : EMPTY_DIAGRAM,
     past: [],
     future: [],
     board: { ...stored?.board, title: stored?.board.title || DEFAULT_TITLE },
-    // Every change re-lays out connectors so arrows follow the shapes they are attached to.
-    update: (fn, record = true) => dispatch({ type: 'update', fn: (shapes) => syncConnectors(fn(shapes)), record }),
+    update: (fn, record = true) => dispatch({ type: 'update', fn, record }),
     checkpoint: (snapshot) => dispatch({ type: 'checkpoint', snapshot }),
     undo: () => dispatch({ type: 'undo' }),
     redo: () => dispatch({ type: 'redo' }),
@@ -42,5 +41,7 @@ export const useDocumentStore = create<DocumentState>()((set) => {
 })
 
 useDocumentStore.subscribe((state, prev) => {
-  if (state.shapes !== prev.shapes || state.board !== prev.board) saveBoard(toArchDoc(state.shapes, state.board))
+  if (state.diagram !== prev.diagram || state.board !== prev.board) {
+    saveBoard({ schema: ARCHDOC_SCHEMA, board: state.board, ...state.diagram })
+  }
 })

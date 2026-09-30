@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { shapeColors } from './palette'
+import { connectionColor, shapeColors } from './palette'
 
 describe('shapeColors', () => {
   it('uses the default look without style', () => {
@@ -19,7 +19,8 @@ describe('shapeColors', () => {
   })
 
   it('honors explicit stroke tokens and none', () => {
-    expect(shapeColors({ shape: 'connector', style: { stroke: 'red' } }).stroke).toBe('#d23c3c')
+    expect(connectionColor({ style: { stroke: 'red' } })).toBe('#d23c3c')
+    expect(connectionColor({})).toBe('#1e1e1e')
     expect(shapeColors({ shape: 'rectangle', style: { fill: 'blue', stroke: 'black' } }).stroke).toBe('#1e1e1e')
     expect(shapeColors({ shape: 'rectangle', style: { fill: 'none', stroke: 'none' } })).toEqual({ fill: 'none', stroke: 'none' })
   })

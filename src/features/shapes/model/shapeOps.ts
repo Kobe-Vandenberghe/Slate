@@ -2,12 +2,12 @@ import { centerOf, normalizeDegrees, rotatePoint, toDegrees } from '@/shared/mat
 import type { Bounds, Vec } from '@/shared/math'
 import type { ColorToken } from '@/features/archdoc'
 import { resizeRotated } from './transform'
-import { isConnector, mapConnectorPoints } from './connectors'
 import type { ResizeHandle, Shape } from './types'
 
 /*
- * Pure operations on the shape list. Each returns a new array, or the SAME array when nothing
+ * Pure operations on the element list. Each returns a new array, or the SAME array when nothing
  * changed — the document store relies on that identity to skip no-op undo steps.
+ * Ops over elements *and* connections live in `diagram.ts`.
  */
 
 type Ids = ReadonlySet<string>
@@ -15,11 +15,7 @@ type Ids = ReadonlySet<string>
 const MIN_SHAPE_SIZE = 4
 
 export const translateShapes = (shapes: Shape[], ids: Ids, dx: number, dy: number) =>
-  shapes.map((s) =>
-    ids.has(s.id)
-      ? { ...s, x: s.x + dx, y: s.y + dy, ...mapConnectorPoints(s, (p) => ({ x: p.x + dx, y: p.y + dy })) }
-      : s,
-  )
+  shapes.map((s) => (ids.has(s.id) ? { ...s, x: s.x + dx, y: s.y + dy } : s))
 
 /** Scales a group of shapes from one bounding box to another (multi-selection resize). */
 export function scaleShapes(shapes: Shape[], ids: Ids, from: Bounds, to: Bounds) {
@@ -33,7 +29,6 @@ export function scaleShapes(shapes: Shape[], ids: Ids, from: Bounds, to: Bounds)
           y: to.y + (s.y - from.y) * sy,
           w: Math.max(s.w * sx, MIN_SHAPE_SIZE),
           h: Math.max(s.h * sy, MIN_SHAPE_SIZE),
-          ...mapConnectorPoints(s, (p) => ({ x: to.x + (p.x - from.x) * sx, y: to.y + (p.y - from.y) * sy })),
         }
       : s,
   )
@@ -49,28 +44,27 @@ export function resizeShape(shapes: Shape[], target: Shape, handle: ResizeHandle
 export function rotateShapes(shapes: Shape[], ids: Ids, center: Vec, delta: number) {
   return shapes.map((s) => {
     if (!ids.has(s.id)) return s
-    if (isConnector(s)) return { ...s, ...mapConnectorPoints(s, (p) => rotatePoint(p, center, delta)) }
     const c = rotatePoint(centerOf(s), center, delta)
     return { ...s, x: c.x - s.w / 2, y: c.y - s.h / 2, rotation: normalizeDegrees(s.rotation + toDegrees(delta)) }
   })
 }
 
-export const removeShapes = (shapes: Shape[], ids: Ids) => shapes.filter((s) => !ids.has(s.id))
+export const removeShapes = <T extends { id: string }>(items: T[], ids: Ids) => items.filter((s) => !ids.has(s.id))
 
-/** Connectors take the token as line color; other shapes as fill, with the outline following the fill. */
+/** Sets the fill token and resets the outline, so it follows the fill's palette entry. */
 export const recolorShapes = (shapes: Shape[], ids: Ids, token: ColorToken) =>
   shapes.map((s) => {
     if (!ids.has(s.id)) return s
-    if (isConnector(s)) return { ...s, style: { ...s.style, stroke: token } }
     const style = { ...s.style, fill: token }
     delete style.stroke
     return { ...s, style }
   })
 
-/** Moves shapes to the top (end of the list) or bottom of the stacking order. */
-export function reorderShapes(shapes: Shape[], ids: Ids, toFront: boolean) {
-  const picked = shapes.filter((s) => ids.has(s.id))
-  const rest = shapes.filter((s) => !ids.has(s.id))
+/** Moves items to the top (end of the list) or bottom of the stacking order. */
+export function reorderShapes<T extends { id: string }>(items: T[], ids: Ids, toFront: boolean) {
+  const picked = items.filter((s) => ids.has(s.id))
+  if (!picked.length) return items
+  const rest = items.filter((s) => !ids.has(s.id))
   return toFront ? [...rest, ...picked] : [...picked, ...rest]
 }
 

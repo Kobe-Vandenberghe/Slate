@@ -9,7 +9,7 @@ import {
   selectAll,
   zoomToContent,
 } from '@/features/editor'
-import { getSelectedShapes, useSelectionStore } from '@/features/selection'
+import { getSelection, useSelectionStore } from '@/features/selection'
 import { useEditingStore } from '@/features/text-editing'
 import { TOOL_SHORTCUTS, useToolStore } from '@/features/tools'
 import { useViewportStore } from '@/features/viewport'
@@ -51,7 +51,7 @@ export function useKeyboardShortcuts() {
       if (e.ctrlKey || e.metaKey) {
         const command = modifiedCommand(key, e.shiftKey)
         // Leave native copy alone when nothing on the board is selected.
-        if (!command || (key === 'c' && !getSelectedShapes().length)) return
+        if (!command || (key === 'c' && !getSelection().ids.size)) return
         e.preventDefault()
         command()
         return
@@ -68,10 +68,10 @@ export function useKeyboardShortcuts() {
           useToolStore.getState().setTool('select')
           return
         case 'Enter': {
-          const selected = getSelectedShapes()
-          if (selected.length !== 1) return
+          const { ids, elements } = getSelection()
+          if (ids.size !== 1 || elements.length !== 1) return
           e.preventDefault()
-          useEditingStore.getState().startEditing(selected[0].id)
+          useEditingStore.getState().startEditing(elements[0].id)
           return
         }
         case ']':

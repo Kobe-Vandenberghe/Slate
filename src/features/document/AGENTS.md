@@ -1,16 +1,15 @@
 # document
 
 ## Owns
-- `useDocumentStore`: the persisted board, meaning `shapes`, undo/redo history (`past`/`future`) and `board`
-  (title + properties, not part of undo).
+- `useDocumentStore`: the board as an in-memory ArchDoc: `diagram` (`{ elements, connections }`), undo/redo
+  history (`past`/`future`, whole-diagram snapshots) and `board` (title + properties, not part of undo).
 - The pure `historyReducer` (`model/history.ts`).
 - Persistence and the storage schema (`model/storage.ts`): keys, `SCHEMA_VERSION`, `MIGRATIONS`. The board is saved
   as a canonical ArchDoc (`docs/archdoc.md`).
-- `model/archdocAdapter.ts`: temporary `Shape[]` ↔ ArchDoc bridge until connectors leave the shape list (ADR 0009).
 - `TopBar` (brand, `BoardTitle`, undo/redo buttons).
 
 ## Public API
-`useDocumentStore`, `DEFAULT_TITLE`, `ShapesUpdater`, `SCHEMA_VERSION`, `TopBar`.
+`useDocumentStore`, `DEFAULT_TITLE`, `DiagramUpdater`, `SCHEMA_VERSION`, `TopBar`.
 
 ## Depends on
 `@/features/archdoc`, `@/features/shapes` (types), `@/shared/ui`.
@@ -28,9 +27,8 @@
 - `read`/`write` swallow storage errors (private mode, quota, node tests). Don't add throws.
 - A stored board that fails validation is copied to `miroclone:board:corrupt` and the app starts empty.
 - Before v5 the title had its own key (`miroclone:title`). It is only read when migrating older boards.
-- The adapter drops connection `label`/`properties`/`waypoints`/`arrows` (nothing creates them yet).
 - History is capped (`HISTORY_LIMIT = 200`).
 - The title is saved on each keystroke. `BoardTitle` restores `DEFAULT_TITLE` on blur if the title is empty.
 
 ## Tests
-`npx vitest run src/features/document` (`history.test.ts`, `storage.test.ts`, `archdocAdapter.test.ts`).
+`npx vitest run src/features/document` (`history.test.ts`, `storage.test.ts`).

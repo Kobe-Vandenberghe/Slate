@@ -113,7 +113,6 @@ export function ShapeGeometry({ type, w, h, fill, stroke, strokeWidth = 2 }: Sha
       return <rect x={0} y={0} width={w} height={h} rx={2} fill={fill} />
 
     case 'text':
-    case 'connector':
       return null
   }
 }

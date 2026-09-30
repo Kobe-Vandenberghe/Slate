@@ -1,4 +1,4 @@
-import type { ColorToken } from '@/features/archdoc'
+import type { ColorToken, Connection } from '@/features/archdoc'
 import type { PaletteColor, Shape } from './types'
 
 /** Colors offered for regular shapes (pastel fill + matching outline). */
@@ -43,7 +43,7 @@ function strokeOf(token: ColorToken, fallback: string) {
 
 /**
  * Real colors for a shape's style tokens. Without a `stroke` token the outline matches the fill's palette
- * entry. `stroke` is also the text color of `text` shapes and the line color of connectors.
+ * entry. `stroke` is also the text color of `text` shapes.
  */
 export function shapeColors({ shape, style }: Pick<Shape, 'shape' | 'style'>): { fill: string; stroke: string } {
   const sticky = shape === 'sticky'
@@ -53,3 +53,7 @@ export function shapeColors({ shape, style }: Pick<Shape, 'shape' | 'style'>): {
     stroke: style?.stroke ? strokeOf(style.stroke, base.stroke) : base.stroke,
   }
 }
+
+/** Line color of a connection. */
+export const connectionColor = (c: Pick<Connection, 'style'>) =>
+  c.style?.stroke ? strokeOf(c.style.stroke, INK) : INK

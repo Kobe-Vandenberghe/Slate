@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { ContextToolbar, zoomToContent } from '@/features/editor'
 import { TopBar } from '@/features/document'
 import { cursorFor, useKeyboardShortcuts, usePointerInteractions, useSpaceHeld } from '@/features/interaction'
-import { MarqueeBox, SelectionOverlay, useSelectedShapes } from '@/features/selection'
+import { MarqueeBox, SelectionOverlay } from '@/features/selection'
 import { ShapeLibrary, useShapeDrop } from '@/features/shape-library'
 import { useEditingStore } from '@/features/text-editing'
 import { Toolbar, useToolStore } from '@/features/tools'
@@ -22,7 +22,6 @@ export function Whiteboard() {
   const tool = useToolStore((s) => s.tool)
   const editingId = useEditingStore((s) => s.editingId)
   const zoom = useViewportStore((s) => s.camera.z)
-  const selectedShapes = useSelectedShapes()
 
   return (
     <>
@@ -32,7 +31,7 @@ export function Whiteboard() {
         handlers={{ ...pointer.handlers, ...drop }}
       >
         <BoardShapes />
-        <SelectionOverlay shapes={selectedShapes} zoom={zoom} showHandles={!editingId} />
+        <SelectionOverlay zoom={zoom} showHandles={!editingId} />
         {pointer.marquee && <MarqueeBox bounds={pointer.marquee} zoom={zoom} />}
       </Canvas>
 

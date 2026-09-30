@@ -1,7 +1,7 @@
 import type { ShapeType } from '@/features/shapes'
 
-/** The active tool. Any shape type doubles as a "draw this shape" tool. */
-export type Tool = 'select' | 'hand' | ShapeType
+/** The active tool. Any shape type doubles as a "draw this shape" tool; `connector` draws connections. */
+export type Tool = 'select' | 'hand' | 'connector' | ShapeType
 
 /** Single-key shortcuts (no modifiers). */
 export const TOOL_SHORTCUTS: Record<string, Tool> = {
