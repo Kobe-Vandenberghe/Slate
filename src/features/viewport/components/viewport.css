@@ -1,0 +1,26 @@
+.canvas {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background-color: var(--color-canvas);
+  background-image: radial-gradient(circle, var(--color-grid-dot) 1px, transparent 1.3px);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.canvas-world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+}
+
+.zoom-controls {
+  right: var(--panel-inset);
+  bottom: var(--panel-inset);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+}

@@ -1,0 +1,72 @@
+.selection-frame,
+.selection-outline,
+.marquee {
+  position: absolute;
+  border-style: solid;
+  border-color: var(--color-accent);
+  pointer-events: none;
+}
+
+.selection-frame {
+  box-sizing: content-box;
+}
+
+.selection-outline {
+  box-sizing: border-box;
+  border-color: var(--color-accent-soft);
+}
+
+.marquee {
+  box-sizing: border-box;
+  background: var(--color-accent-wash);
+}
+
+.handle {
+  position: absolute;
+  box-sizing: border-box;
+  background: var(--color-surface);
+  border-style: solid;
+  border-color: var(--color-accent);
+  border-radius: 2px;
+  pointer-events: auto;
+}
+
+.handle-rotate {
+  border-radius: 50%;
+}
+
+.handle-endpoint {
+  border-radius: 50%;
+}
+
+.handle-endpoint.is-bound {
+  background: var(--color-accent);
+}
+
+.rotate-stem {
+  position: absolute;
+  background: var(--color-accent);
+  pointer-events: none;
+}
+
+/* Handle cursors only in select mode (`data-mode` is set by the viewport Canvas). */
+[data-mode='select'] .handle-rotate,
+[data-mode='select'] .handle-endpoint {
+  cursor: grab;
+}
+[data-mode='select'] .handle-nw,
+[data-mode='select'] .handle-se {
+  cursor: nwse-resize;
+}
+[data-mode='select'] .handle-ne,
+[data-mode='select'] .handle-sw {
+  cursor: nesw-resize;
+}
+[data-mode='select'] .handle-n,
+[data-mode='select'] .handle-s {
+  cursor: ns-resize;
+}
+[data-mode='select'] .handle-e,
+[data-mode='select'] .handle-w {
+  cursor: ew-resize;
+}

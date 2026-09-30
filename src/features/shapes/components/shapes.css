@@ -1,0 +1,87 @@
+/* Shapes in world space. Sizes are world units (scaled by the camera). */
+
+.shape {
+  position: absolute;
+  box-sizing: border-box;
+}
+
+.shape-svg {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.shape-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  box-sizing: border-box;
+  text-align: center;
+  font-size: 16px;
+  line-height: 1.35;
+  color: var(--color-ink);
+  overflow: hidden;
+}
+
+.shape-label {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
+
+/* Free text: top-left aligned and auto-height. */
+.shape-text .shape-content {
+  position: relative;
+  inset: auto;
+  padding: 2px 4px;
+  justify-content: flex-start;
+  text-align: left;
+  font-size: 22px;
+  overflow: visible;
+}
+
+.shape-text .shape-label {
+  width: 100%;
+  min-height: 1.35em;
+}
+
+/* Sticky notes: soft contact shadow + a "lifted paper" shadow under the bottom edge. */
+.shape-sticky .shape-svg {
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.1)) drop-shadow(0 4px 6px rgb(0 0 0 / 0.08));
+}
+
+.shape-sticky::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: 8%;
+  right: 8%;
+  bottom: 6px;
+  height: 30%;
+  border-radius: 50%;
+  box-shadow: 0 14px 16px rgb(0 0 0 / 0.28);
+}
+
+.shape-sticky .shape-content {
+  background: linear-gradient(to bottom, rgb(255 255 255 / 0) 70%, rgb(0 0 0 / 0.035));
+}
+
+/* Connectors: only the line and arrowhead are clickable, not the empty SVG box. */
+.connector {
+  position: absolute;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.connector-hit {
+  stroke: transparent;
+  pointer-events: stroke;
+}
+
+.connector-head {
+  pointer-events: fill;
+}

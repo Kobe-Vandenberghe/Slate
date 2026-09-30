@@ -1,0 +1,28 @@
+/* Design tokens. The single source of truth for colors, radii and shadows (see docs/design-system.md). */
+:root {
+  --color-accent: #4f6bff;
+  --color-accent-strong: #3b55e6;
+  --color-accent-soft: rgb(79 107 255 / 0.5);
+  --color-accent-wash: rgb(79 107 255 / 0.08);
+  --color-accent-bg: #e6eaff;
+
+  --color-ink: #1e1e1e;
+  --color-ink-muted: #50556a;
+  --color-ink-subtle: #6b7080;
+  --color-ink-faint: #8a8fa0;
+
+  --color-surface: #ffffff;
+  --color-canvas: #f6f7f9;
+  --color-grid-dot: #c5c9d3;
+  --color-hover: #f0f1f5;
+  --color-divider: #e4e6eb;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+
+  --shadow-panel: 0 1px 2px rgb(0 0 0 / 0.08), 0 4px 16px rgb(0 0 0 / 0.08);
+
+  --z-panel: 10;
+  --panel-inset: 12px;
+}

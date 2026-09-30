@@ -1,0 +1,36 @@
+.topbar {
+  top: var(--panel-inset);
+  left: var(--panel-inset);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 44px;
+  padding: 0 6px 0 14px;
+  box-sizing: border-box;
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--color-accent-strong);
+}
+
+.board-title {
+  min-width: 60px;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  color: var(--color-ink);
+  outline: none;
+}
+.board-title:hover {
+  border-color: var(--color-divider);
+}
+.board-title:focus {
+  border-color: var(--color-accent);
+  background: var(--color-surface);
+}

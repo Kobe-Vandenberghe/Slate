@@ -1,0 +1,15 @@
+.shape-editor {
+  max-width: 100%;
+  min-width: 1ch;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  outline: none;
+  cursor: text;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.shape-text .shape-editor {
+  width: 100%;
+  min-height: 1.35em;
+}

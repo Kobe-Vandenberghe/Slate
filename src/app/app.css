@@ -1,0 +1,9 @@
+.shortcut-hint {
+  position: fixed;
+  left: var(--panel-inset);
+  bottom: 14px;
+  z-index: var(--z-panel);
+  font-size: 12px;
+  color: var(--color-ink-faint);
+  pointer-events: none;
+}

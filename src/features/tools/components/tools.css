@@ -1,0 +1,9 @@
+.toolbar {
+  left: var(--panel-inset);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
+}
