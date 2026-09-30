@@ -3,6 +3,7 @@
 ArchDoc is a machine-readable representation of a software architecture diagram that preserves both
 **what the architecture means** and **how the user arranged it**. It is the source of truth for a board;
 the canvas is one view of it. Decision record: [ADR 0009](adr/0009-archdoc-canonical-model.md).
+Implementation: `src/features/archdoc` (`parseArchDoc`, `serializeArchDoc`).
 
 ## Principles
 1. **Source of truth.** A board can be rebuilt exactly from its ArchDoc (Canvas → ArchDoc → Canvas is lossless).
@@ -82,6 +83,10 @@ the board. Future: `string[]`.
 ## Style
 Values are Slate tokens, never CSS or hex. The renderer maps a token to colors, and the mapping may depend on
 `shape` (a `yellow` sticky and a `yellow` rectangle can differ).
+- Colors (`fill`, `stroke`): `white`, `black`, `gray`, `yellow`, `orange`, `pink`, `red`, `green`, `blue`,
+  `purple`, `none`.
+- `icon`: a lowercase, optionally namespaced slug (`dotnet`, `azure:functions`) until an icon registry exists.
+- Absent `fill`/`stroke` means the shape's default look.
 
 ## Ordering
 - `elements` order is sibling z-order. The `frame` field sets containment.
@@ -92,12 +97,15 @@ Values are Slate tokens, never CSS or hex. The renderer maps a token to colors, 
 ## Canonical form
 - Strict JSON (no comments), UTF-8, 2-space indent.
 - Keys in the order of the tables above.
-- Defaults omitted: `text: ""`, `rotation: 0`, empty `properties`/`style`, `arrows: "end"`.
-- Numbers rounded to 2 decimals.
+- Defaults omitted: `text: ""`, `rotation: 0`, empty `properties`/`style`/`alias`/`kind`/`label`/`waypoints`,
+  `arrows: "end"`. The parser treats these the same as absent.
+- Coordinates, sizes and rotation rounded to 2 decimals. Anchors rounded to 4 (they scale with the target).
+  Property values are never rounded.
 - Arrays keep their order (it is data).
 
 ## Validation (reject the document)
 - Missing required field, wrong value type, or unknown field outside `properties`.
+- A non-positive `w`/`h`, or an anchor outside `0..1`.
 - Duplicate `id` or `alias`, or an alias that doesn't match the pattern.
 - `frame` that doesn't reference an element with `shape: "frame"`, or a frame that has a `frame`.
 - A frame with non-zero `rotation`.

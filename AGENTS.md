@@ -49,6 +49,7 @@ with no canvas library. This file is the **index**: start here, then open only t
 
 | Feature | Owns | Key exports |
 |---|---|---|
+| `src/features/archdoc` | ArchDoc v1 board model: types, tokens, validation, canonical JSON (pure, no UI) | `ArchDoc`, `parseArchDoc`, `serializeArchDoc` |
 | `src/features/shapes` | Shape model, catalog, palette, pure shape ops, geometry, shape rendering | `Shape`, `createShape`, `*Shapes` ops, `ShapeView` |
 | `src/features/viewport` | Camera (pan/zoom), coordinate conversion, Canvas surface, zoom UI | `useViewportStore`, `screenToWorld`, `Canvas` |
 | `src/features/document` | Persisted shapes + undo/redo, title, storage schema, top bar | `useDocumentStore`, `TopBar` |

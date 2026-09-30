@@ -16,6 +16,7 @@ Features from lowest to highest. A feature may import only features listed above
 
 | Level | Features |
 |---|---|
+| 0 | `archdoc` (nothing, not even `shared`) |
 | 1 | `shapes`, `viewport` (only `shared`) |
 | 2 | `document`, `tools` |
 | 3 | `selection` |
@@ -36,62 +37,63 @@ flowchart LR
 subgraph 0["src"]
 1["app"]
 subgraph 2["features"]
-3["document"]
-4["editor"]
-5["interaction"]
-6["selection"]
-7["shape-library"]
-8["shapes"]
-9["text-editing"]
-A["tools"]
-B["viewport"]
+3["archdoc"]
+4["document"]
+5["editor"]
+6["interaction"]
+7["selection"]
+8["shape-library"]
+9["shapes"]
+A["text-editing"]
+B["tools"]
+C["viewport"]
 end
-subgraph C["shared"]
-D["math"]
-E["ui"]
+subgraph D["shared"]
+E["math"]
+F["ui"]
 end
 end
-1-->3
 1-->4
 1-->5
 1-->6
 1-->7
-1-->9
+1-->8
 1-->A
 1-->B
-1-->8
-3-->E
-3-->8
-4-->6
-4-->8
+1-->C
+1-->9
+4-->F
 4-->9
-4-->B
-4-->D
-4-->E
-4-->3
-4-->A
-5-->3
-5-->4
-5-->6
+5-->7
 5-->9
 5-->A
+5-->C
+5-->E
+5-->F
+5-->4
 5-->B
-5-->8
-5-->D
-6-->D
-6-->8
-6-->3
-7-->8
-7-->A
+6-->4
+6-->5
+6-->7
+6-->A
+6-->B
+6-->C
+6-->9
+6-->E
+7-->E
+7-->9
 7-->4
-7-->B
-8-->D
-9-->3
-9-->6
-9-->8
-A-->E
-A-->8
-B-->D
+8-->9
+8-->B
+8-->5
+8-->C
+9-->E
+A-->4
+A-->7
+A-->9
+B-->F
+B-->9
+C-->E
 ```
 
 <!-- graph:end -->
