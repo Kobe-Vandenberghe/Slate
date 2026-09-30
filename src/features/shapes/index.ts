@@ -5,17 +5,18 @@
 
 // Types
 export type { CatalogItem } from './model/catalog'
-export type { ConnectorEnd, PaletteColor, ResizeHandle, Shape, ShapeKind } from './model/types'
+export type { ConnectorEnd, PaletteColor, ResizeHandle, Shape, ShapeType } from './model/types'
 export type { ConnectorEndName } from './model/connectors'
 
 // Catalog & palette
-export { SHAPE_CATALOG, defaultSize, isShapeKind, opensEditorOnCreate } from './model/catalog'
+export { SHAPE_CATALOG, defaultSize, isShapeType, opensEditorOnCreate } from './model/catalog'
 export {
   DEFAULT_SHAPE_COLOR,
   DEFAULT_STICKY_COLOR,
   SHAPE_COLORS,
   STICKY_COLORS,
   findStickyColor,
+  shapeColors,
 } from './model/palette'
 
 // Creation

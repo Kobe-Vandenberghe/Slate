@@ -13,15 +13,13 @@ import { boundsOf, shapeAABB } from './shapeBounds'
 
 const shape = (id: string, over: Partial<Shape> = {}): Shape => ({
   id,
-  kind: 'rectangle',
+  shape: 'rectangle',
   x: 0,
   y: 0,
   w: 100,
   h: 50,
   rotation: 0,
   text: '',
-  fill: '#fff',
-  stroke: '#000',
   ...over,
 })
 
@@ -37,9 +35,9 @@ describe('shapeOps', () => {
     expect(a).toMatchObject({ x: 20, y: 20, w: 200, h: 100 })
   })
 
-  it('rotates around a center and accumulates rotation', () => {
-    const [a] = rotateShapes([shape('a')], new Set(['a']), { x: 50, y: 25 }, Math.PI / 2)
-    expect(a.rotation).toBeCloseTo(Math.PI / 2)
+  it('rotates around a center and accumulates rotation in degrees', () => {
+    const [a] = rotateShapes([shape('a', { rotation: 350 })], new Set(['a']), { x: 50, y: 25 }, Math.PI / 2)
+    expect(a.rotation).toBeCloseTo(80)
     expect(a.x).toBeCloseTo(0)
     expect(a.y).toBeCloseTo(0)
   })
@@ -50,13 +48,15 @@ describe('shapeOps', () => {
     expect(reorderShapes(list, new Set(['c']), false).map((s) => s.id)).toEqual(['c', 'a', 'b'])
   })
 
-  it('recolors fill and stroke', () => {
-    const [a] = recolorShapes([shape('a')], new Set(['a']), { name: 'X', fill: '#111', stroke: '#222' })
-    expect(a).toMatchObject({ fill: '#111', stroke: '#222' })
+  it('recolors the fill token and resets the outline; connectors get a line color', () => {
+    const connector = shape('c', { shape: 'connector' })
+    const [a, c] = recolorShapes([shape('a', { style: { fill: 'red', stroke: 'black', icon: 'x' } }), connector], new Set(['a', 'c']), 'blue')
+    expect(a.style).toEqual({ fill: 'blue', icon: 'x' })
+    expect(c.style).toEqual({ stroke: 'blue' })
   })
 
   it('removes text shapes whose text is emptied', () => {
-    const list = [shape('t', { kind: 'text', text: 'hi' })]
+    const list = [shape('t', { shape: 'text', text: 'hi' })]
     expect(setShapeText(list, 't', '   ')).toEqual([])
   })
 
@@ -70,7 +70,7 @@ describe('shapeOps', () => {
 
 describe('shapeBounds', () => {
   it('computes the AABB of a 90° rotated shape', () => {
-    const b = shapeAABB(shape('a', { rotation: Math.PI / 2 }))
+    const b = shapeAABB(shape('a', { rotation: 90 }))
     expect(b.x).toBeCloseTo(25)
     expect(b.y).toBeCloseTo(-25)
     expect(b.w).toBeCloseTo(50)

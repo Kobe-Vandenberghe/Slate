@@ -19,7 +19,8 @@ Connectors-as-shapes (0008) mixes relationships into the shape list and stores d
   and there is no nesting or rotation.
 - `style` holds Slate tokens, not colors. `rotation` is in degrees. Aliases are optional unique slugs.
 - Format types, validation, canonical serialization and projections live in a pure `archdoc` feature slice.
-- Persistence keeps ADR 0007's envelope: localStorage schema v4 stores an ArchDoc, with a v3 → v4 migration.
+- Persistence keeps ADR 0007's envelope. Schema v4 moves `Shape` to ArchDoc naming, tokens and degrees. A later version
+  stores a full ArchDoc, with a migration at each step.
 - Undo snapshots the whole document (`elements` + `connections` + board), keeping ADR 0004's protocol.
 - Derived views (AI, Mermaid) are one-way projections and never persisted.
 

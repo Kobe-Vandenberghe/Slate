@@ -11,12 +11,12 @@ export function ShapeGrid() {
     <div className="shape-grid">
       {SHAPE_CATALOG.map((item) => (
         <button
-          key={item.kind}
-          className={`shape-grid-item${tool === item.kind ? ' active' : ''}`}
+          key={item.shape}
+          className={`shape-grid-item${tool === item.shape ? ' active' : ''}`}
           title={`${item.label} — click then draw, or drag onto the board`}
           draggable
-          onDragStart={(e) => writeShapeDragData(e.dataTransfer, item.kind)}
-          onClick={() => setTool(item.kind)}
+          onDragStart={(e) => writeShapeDragData(e.dataTransfer, item.shape)}
+          onClick={() => setTool(item.shape)}
         >
           <ShapePreview item={item} />
           <span>{item.label}</span>

@@ -1,5 +1,6 @@
 import { memo } from 'react'
 import type { Shape } from '../model/types'
+import { shapeColors } from '../model/palette'
 import './shapes.css'
 
 const STROKE_WIDTH = 2
@@ -29,6 +30,7 @@ export const ConnectorView = memo(function ConnectorView({ shape }: { shape: Sha
   const inset = head * Math.cos(HEAD_SPREAD)
   const lx = bx - inset * Math.cos(angle)
   const ly = by - inset * Math.sin(angle)
+  const { stroke } = shapeColors(shape)
 
   return (
     <svg
@@ -39,8 +41,8 @@ export const ConnectorView = memo(function ConnectorView({ shape }: { shape: Sha
       height={shape.h + pad * 2}
     >
       <line className="connector-hit" x1={ax} y1={ay} x2={bx} y2={by} strokeWidth={HIT_WIDTH} />
-      <line x1={ax} y1={ay} x2={lx} y2={ly} stroke={shape.stroke} strokeWidth={STROKE_WIDTH} />
-      <polygon className="connector-head" points={`${bx},${by} ${wing(1)} ${wing(-1)}`} fill={shape.stroke} />
+      <line x1={ax} y1={ay} x2={lx} y2={ly} stroke={stroke} strokeWidth={STROKE_WIDTH} />
+      <polygon className="connector-head" points={`${bx},${by} ${wing(1)} ${wing(-1)}`} fill={stroke} />
     </svg>
   )
 })

@@ -38,7 +38,7 @@ export function ContextToolbar({ hidden }: { hidden: boolean }) {
   const above = topLeft.y > MIN_SPACE_ABOVE
   const x = clamp(topLeft.x + width / 2, EDGE_MARGIN, viewportWidth - EDGE_MARGIN)
   const y = above ? topLeft.y - GAP_ABOVE : topLeft.y + height + GAP_BELOW
-  const onlyStickies = selected.every((s) => s.kind === 'sticky')
+  const onlyStickies = selected.every((s) => s.shape === 'sticky')
 
   return (
     <div

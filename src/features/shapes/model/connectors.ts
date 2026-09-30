@@ -1,4 +1,4 @@
-import { centerOf, clamp, dist, rectFromPoints, rotatePoint } from '@/shared/math'
+import { centerOf, clamp, dist, rectFromPoints, rotatePoint, toRadians } from '@/shared/math'
 import type { Vec } from '@/shared/math'
 import type { ConnectorEnd, Shape } from './types'
 
@@ -10,11 +10,11 @@ import type { ConnectorEnd, Shape } from './types'
 
 export type ConnectorEndName = 'start' | 'end'
 
-export const isConnector = (s: Shape) => s.kind === 'connector'
+export const isConnector = (s: Shape) => s.shape === 'connector'
 
-export function createConnector(start: ConnectorEnd, end: ConnectorEnd, stroke: string, id: string = crypto.randomUUID()): Shape {
+export function createConnector(start: ConnectorEnd, end: ConnectorEnd, id: string = crypto.randomUUID()): Shape {
   const box = rectFromPoints(start, end)
-  return { id, kind: 'connector', ...box, rotation: 0, text: '', fill: 'none', stroke, start, end }
+  return { id, shape: 'connector', ...box, rotation: 0, text: '', start, end }
 }
 
 // ---- outline geometry (shape-local, unrotated, (0,0) = top-left) -----------
@@ -41,8 +41,8 @@ const cubic = (p0: Vec, p1: Vec, p2: Vec, p3: Vec): Vec[] =>
   })
 
 /** The shape's outline as a polygon. Mirrors `ShapeGeometry` (without the stroke inset); others use the box. */
-function outline({ kind, w, h }: Shape): Vec[] {
-  switch (kind) {
+function outline({ shape, w, h }: Shape): Vec[] {
+  switch (shape) {
     case 'ellipse':
       return Array.from({ length: ELLIPSE_SEGMENTS }, (_, i) => {
         const a = (i / ELLIPSE_SEGMENTS) * Math.PI * 2
@@ -90,11 +90,12 @@ function outline({ kind, w, h }: Shape): Vec[] {
 }
 
 const toLocal = (s: Shape, p: Vec): Vec => {
-  const q = rotatePoint(p, centerOf(s), -s.rotation)
+  const q = rotatePoint(p, centerOf(s), -toRadians(s.rotation))
   return { x: q.x - s.x, y: q.y - s.y }
 }
 
-const toWorld = (s: Shape, p: Vec): Vec => rotatePoint({ x: s.x + p.x, y: s.y + p.y }, centerOf(s), s.rotation)
+const toWorld = (s: Shape, p: Vec): Vec =>
+  rotatePoint({ x: s.x + p.x, y: s.y + p.y }, centerOf(s), toRadians(s.rotation))
 
 const cross = (a: Vec, b: Vec) => a.x * b.y - a.y * b.x
 

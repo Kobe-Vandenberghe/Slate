@@ -1,6 +1,7 @@
 import { memo, useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
 import type { Shape } from '../model/types'
+import { shapeColors } from '../model/palette'
 import { ShapeGeometry } from './ShapeGeometry'
 import './shapes.css'
 
@@ -18,8 +19,9 @@ type ShapeViewProps = {
  */
 export const ShapeView = memo(function ShapeView({ shape, editor, onMeasureHeight }: ShapeViewProps) {
   const rootRef = useRef<HTMLDivElement>(null)
-  const isText = shape.kind === 'text'
+  const isText = shape.shape === 'text'
   const { id } = shape
+  const { fill, stroke } = shapeColors(shape)
 
   useEffect(() => {
     const el = rootRef.current
@@ -32,23 +34,23 @@ export const ShapeView = memo(function ShapeView({ shape, editor, onMeasureHeigh
   return (
     <div
       ref={rootRef}
-      className={`shape shape-${shape.kind}`}
+      className={`shape shape-${shape.shape}`}
       data-shape-id={id}
       style={{
         left: shape.x,
         top: shape.y,
         width: shape.w,
         height: isText ? undefined : shape.h,
-        // Always set (even 0rad): the sticky shadow needs the stacking context a transform creates.
-        transform: `rotate(${shape.rotation}rad)`,
+        // Always set (even 0deg): the sticky shadow needs the stacking context a transform creates.
+        transform: `rotate(${shape.rotation}deg)`,
       }}
     >
       {!isText && (
         <svg className="shape-svg" width={shape.w} height={shape.h}>
-          <ShapeGeometry kind={shape.kind} w={shape.w} h={shape.h} fill={shape.fill} stroke={shape.stroke} />
+          <ShapeGeometry type={shape.shape} w={shape.w} h={shape.h} fill={fill} stroke={stroke} />
         </svg>
       )}
-      <div className="shape-content" style={isText ? { color: shape.stroke } : undefined}>
+      <div className="shape-content" style={isText ? { color: stroke } : undefined}>
         {editor ?? <div className="shape-label">{shape.text}</div>}
       </div>
     </div>

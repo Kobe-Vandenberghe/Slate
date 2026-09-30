@@ -12,6 +12,9 @@ Files: `src/features/shapes/model/types.ts`, `src/features/document/model/storag
 3. **Add a migration** `MIGRATIONS[<old version>] = (data) => ({ version: <new>, shapes: … })`.
    - Input is the previous version's stored object (v0 is a bare array; v1+ is `{ version, shapes }`).
    - Give every existing shape a sensible default for the new field. Never drop user data silently.
+   - Never import live constants (palettes, catalogs) into a migration. Freeze the values it needs inside
+     `storage.ts`, or later changes would silently alter how old boards migrate.
+   - Keep `docs/archdoc.md` in step: the stored format is converging on ArchDoc (ADR 0009).
 4. **Test** in `storage.test.ts`:
    - Old-format JSON loads and gets the new field.
    - A full chain from v0 still works (legacy boards must keep loading).

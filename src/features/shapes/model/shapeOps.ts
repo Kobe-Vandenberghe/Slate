@@ -1,8 +1,9 @@
-import { centerOf, normalizeAngle, rotatePoint } from '@/shared/math'
+import { centerOf, normalizeDegrees, rotatePoint, toDegrees } from '@/shared/math'
 import type { Bounds, Vec } from '@/shared/math'
+import type { ColorToken } from '@/features/archdoc'
 import { resizeRotated } from './transform'
 import { isConnector, mapConnectorPoints } from './connectors'
-import type { PaletteColor, ResizeHandle, Shape } from './types'
+import type { ResizeHandle, Shape } from './types'
 
 /*
  * Pure operations on the shape list. Each returns a new array, or the SAME array when nothing
@@ -50,14 +51,21 @@ export function rotateShapes(shapes: Shape[], ids: Ids, center: Vec, delta: numb
     if (!ids.has(s.id)) return s
     if (isConnector(s)) return { ...s, ...mapConnectorPoints(s, (p) => rotatePoint(p, center, delta)) }
     const c = rotatePoint(centerOf(s), center, delta)
-    return { ...s, x: c.x - s.w / 2, y: c.y - s.h / 2, rotation: normalizeAngle(s.rotation + delta) }
+    return { ...s, x: c.x - s.w / 2, y: c.y - s.h / 2, rotation: normalizeDegrees(s.rotation + toDegrees(delta)) }
   })
 }
 
 export const removeShapes = (shapes: Shape[], ids: Ids) => shapes.filter((s) => !ids.has(s.id))
 
-export const recolorShapes = (shapes: Shape[], ids: Ids, color: PaletteColor) =>
-  shapes.map((s) => (ids.has(s.id) ? { ...s, fill: color.fill, stroke: color.stroke } : s))
+/** Connectors take the token as line color; other shapes as fill, with the outline following the fill. */
+export const recolorShapes = (shapes: Shape[], ids: Ids, token: ColorToken) =>
+  shapes.map((s) => {
+    if (!ids.has(s.id)) return s
+    if (isConnector(s)) return { ...s, style: { ...s.style, stroke: token } }
+    const style = { ...s.style, fill: token }
+    delete style.stroke
+    return { ...s, style }
+  })
 
 /** Moves shapes to the top (end of the list) or bottom of the stacking order. */
 export function reorderShapes(shapes: Shape[], ids: Ids, toFront: boolean) {
@@ -70,7 +78,7 @@ export function reorderShapes(shapes: Shape[], ids: Ids, toFront: boolean) {
 export function setShapeText(shapes: Shape[], id: string, text: string) {
   const shape = shapes.find((s) => s.id === id)
   if (!shape) return shapes
-  if (shape.kind === 'text' && !text.trim()) return shapes.filter((s) => s.id !== id)
+  if (shape.shape === 'text' && !text.trim()) return shapes.filter((s) => s.id !== id)
   if (shape.text === text) return shapes
   return shapes.map((s) => (s.id === id ? { ...s, text } : s))
 }

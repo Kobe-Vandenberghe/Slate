@@ -39,7 +39,7 @@ describe('editor commands', () => {
     placeShape('sticky', { x: 0, y: 0 })
     const [sticky] = shapes()
     expect(useEditingStore.getState().editingId).toBe(sticky.id)
-    expect(sticky.fill).toBe(STICKY_COLORS[2].fill)
+    expect(sticky.style?.fill).toBe(STICKY_COLORS[2].token)
   })
 
   it('duplicates and deletes the selection', () => {

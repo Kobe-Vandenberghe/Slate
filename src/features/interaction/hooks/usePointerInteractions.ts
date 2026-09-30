@@ -23,7 +23,7 @@ import type { ResizeHandle } from '@/features/shapes'
 import { useEditingStore } from '@/features/text-editing'
 import { useToolStore } from '@/features/tools'
 import { panCamera, screenToWorld, useViewportStore } from '@/features/viewport'
-import { angleBetween, centerOf, dist, intersects, rectFromPoints } from '@/shared/math'
+import { angleBetween, centerOf, dist, intersects, rectFromPoints, toRadians } from '@/shared/math'
 import type { Bounds, Vec } from '@/shared/math'
 import { handleAt, isInsideTextEditor, shapeIdAt } from '../model/dom'
 import { CREATE_THRESHOLD, DOUBLE_CLICK_MS, DOUBLE_CLICK_SLOP, MOVE_THRESHOLD, SNAP_DISTANCE } from '../model/dragSession'
@@ -115,7 +115,7 @@ export function usePointerInteractions(spaceHeld: boolean) {
     }
 
     if (tool !== 'select') {
-      begin(e, { type: 'create', kind: tool, startWorld: world, startScreen: screen, shapeId: null, snapshot: doc().shapes })
+      begin(e, { type: 'create', shape: tool, startWorld: world, startScreen: screen, shapeId: null, snapshot: doc().shapes })
       return
     }
 
@@ -162,7 +162,7 @@ export function usePointerInteractions(spaceHeld: boolean) {
         type: 'rotate',
         center,
         startAngle: angleBetween(center, world),
-        baseRotation: single?.rotation ?? 0,
+        baseRotation: toRadians(single?.rotation ?? 0),
         ...common,
       }
     }
@@ -262,7 +262,7 @@ export function usePointerInteractions(spaceHeld: boolean) {
     if (!s.shapeId && dist(screen, s.startScreen) < CREATE_THRESHOLD) return
     const isNew = !s.shapeId
     s.shapeId ??= crypto.randomUUID()
-    const shape = createShape(s.kind, rectFromPoints(s.startWorld, world), colorFor(s.kind), s.shapeId)
+    const shape = createShape(s.shape, rectFromPoints(s.startWorld, world), colorFor(s.shape), s.shapeId)
     doc().update(() => [...s.snapshot, shape], false)
     if (isNew) {
       useSelectionStore.getState().select([shape.id])
@@ -275,7 +275,7 @@ export function usePointerInteractions(spaceHeld: boolean) {
     const isNew = !s.connectorId
     s.connectorId ??= crypto.randomUUID()
     const end = connectorEndAt(s.snapshot, world, snapDistance(), s.start.shapeId)
-    const connector = createConnector(s.start, end, colorFor('connector').stroke, s.connectorId)
+    const connector = createConnector(s.start, end, s.connectorId)
     doc().update(() => [...s.snapshot, connector], false)
     if (isNew) {
       useSelectionStore.getState().select([connector.id])
@@ -319,9 +319,9 @@ export function usePointerInteractions(spaceHeld: boolean) {
       case 'create':
         if (session.shapeId) {
           doc().checkpoint(session.snapshot)
-          finishCreation(session.shapeId, session.kind)
+          finishCreation(session.shapeId, session.shape)
         } else {
-          placeShape(session.kind, session.startWorld)
+          placeShape(session.shape, session.startWorld)
         }
         break
       case 'connect':

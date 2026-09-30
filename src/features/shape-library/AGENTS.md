@@ -11,8 +11,8 @@
 `editor` (`placeShape`, `colorFor`), `shapes` (catalog, palette, `ShapePreview`), `tools`, `viewport`.
 
 ## Invariants
-- Click = arm the tool (`setTool(kind)` / `pickStickyColor(color)`). Drag = place at the drop point via `placeShape`.
-- Drag data uses custom MIME types. `readShapeDragData` validates the kind with `isShapeKind` (the payload is untrusted).
+- Click = arm the tool (`setTool(shape)` / `pickStickyColor(color)`). Drag = place at the drop point via `placeShape`.
+- Drag data uses custom MIME types. `readShapeDragData` validates the shape type with `isShapeType` (the payload is untrusted).
 - The library lists `SHAPE_CATALOG` plus sticky colors. Text is created from the tool rail or by double-click.
 
 ## Gotchas

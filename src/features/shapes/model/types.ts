@@ -1,20 +1,8 @@
+import type { ColorToken, ElementShape, ElementStyle } from '@/features/archdoc'
 import type { Vec } from '@/shared/math'
 
-export type ShapeKind =
-  | 'rectangle'
-  | 'rounded'
-  | 'ellipse'
-  | 'diamond'
-  | 'triangle'
-  | 'parallelogram'
-  | 'hexagon'
-  | 'cylinder'
-  | 'document'
-  | 'star'
-  | 'arrow'
-  | 'sticky'
-  | 'text'
-  | 'connector'
+/** How a shape is drawn. Frames arrive with stage 4; connectors leave the list in stage 2b (ADR 0009). */
+export type ShapeType = Exclude<ElementShape, 'frame'> | 'connector'
 
 /**
  * One end of a connector. `x/y` is always the resolved world point; `shapeId` binds it to a shape.
@@ -26,17 +14,16 @@ export type ConnectorEnd = { x: number; y: number; shapeId?: string; anchor?: Ve
 /** A single item on the board, in world units. `x/y/w/h` describe the unrotated box. */
 export type Shape = {
   id: string
-  kind: ShapeKind
+  shape: ShapeType
   x: number
   y: number
   w: number
   h: number
-  /** Radians, clockwise around the shape's center. */
+  /** Degrees, clockwise around the shape's center. */
   rotation: number
   text: string
-  fill: string
-  /** Outline color; also the text color for `text` shapes and the line color for connectors. */
-  stroke: string
+  /** Color tokens; resolve to real colors with `shapeColors`. Absent = the shape's default look. */
+  style?: ElementStyle
   /** Connectors only. `x/y/w/h` of a connector is derived from its ends (see `syncConnectors`). */
   start?: ConnectorEnd
   end?: ConnectorEnd
@@ -44,4 +31,4 @@ export type Shape = {
 
 export type ResizeHandle = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw'
 
-export type PaletteColor = { name: string; fill: string; stroke: string }
+export type PaletteColor = { token: ColorToken; name: string; fill: string; stroke: string }

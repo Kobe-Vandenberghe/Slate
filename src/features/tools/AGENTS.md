@@ -2,17 +2,17 @@
 
 ## Owns
 - `useToolStore`: the active `tool` and the `stickyColor` used for the next sticky note.
-- The `Tool` type (`'select' | 'hand' | ShapeKind`), `TOOL_SHORTCUTS` and `isShapeTool`.
+- The `Tool` type (`'select' | 'hand' | ShapeType`), `TOOL_SHORTCUTS` and `isShapeTool`.
 - `Toolbar`, the left tool rail (select, hand, text, arrow, library toggle).
 
 ## Public API
 `Tool`, `TOOL_SHORTCUTS`, `isShapeTool`, `useToolStore`, `Toolbar`.
 
 ## Depends on
-`@/features/shapes` (ShapeKind, palette), `@/shared/ui`.
+`@/features/shapes` (ShapeType, palette), `@/shared/ui`.
 
 ## Invariants
-- Any `ShapeKind` is also a valid tool, meaning "draw this shape".
+- Any `ShapeType` is also a valid tool, meaning "draw this shape".
 - `pickStickyColor` sets the color **and** arms the `sticky` tool.
 - After a shape is created the tool returns to `select` (done by `editor.finishCreation`, not here).
 - Whether the library panel is open is app-level UI state, passed into `Toolbar` as props.

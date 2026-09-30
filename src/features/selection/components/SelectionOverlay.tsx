@@ -35,7 +35,7 @@ export function SelectionOverlay({ shapes, zoom, showHandles }: SelectionOverlay
               width: s.w,
               height: s.h,
               borderWidth: OUTLINE_BORDER / zoom,
-              transform: `rotate(${s.rotation}rad)`,
+              transform: `rotate(${s.rotation}deg)`,
             }}
           />
         ))}
@@ -47,7 +47,7 @@ export function SelectionOverlay({ shapes, zoom, showHandles }: SelectionOverlay
           width: frame.w,
           height: frame.h,
           borderWidth: border,
-          transform: `rotate(${frame.rotation}rad)`,
+          transform: `rotate(${frame.rotation}deg)`,
         }}
       >
         {showHandles && <SelectionHandles zoom={zoom} border={border} />}

@@ -21,7 +21,7 @@ Nothing (not even `shared`). This is the lowest feature. It has no stores and no
 
 ## Gotchas
 - The element type is `BoardElement`, not `Element`, so it doesn't shadow the DOM `Element` type.
-- `rotation` is in **degrees** here, while the legacy `Shape` stores radians. Convert at the boundary.
+- `rotation` is in degrees, the same as the app's `Shape` (since schema v4).
 - `tokens.ts` must not import `types.ts` (types import tokens). A type-only cycle still fails `npm run deps`.
 - Anchors round to 4 decimals and coordinates to 2. Round-trip tests need values that already fit.
 

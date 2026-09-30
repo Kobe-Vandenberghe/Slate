@@ -149,4 +149,4 @@ flowchart LR
 Each shape is an absolutely positioned `div` containing an SVG outline and an HTML label (ADR 0002). The browser
 therefore handles text layout, editing and hit-testing. The DOM hooks are `data-shape-id` on shapes,
 `data-handle` on handles (`n`…`sw`, `rotate`, and `start`/`end` on a selected connector) and `data-text-editor` on the editor.
-Connectors (arrows) are `kind: 'connector'` shapes drawn by `ConnectorView` as an SVG line (ADR 0008).
+Connectors (arrows) are `shape: 'connector'` shapes drawn by `ConnectorView` as an SVG line (ADR 0008).

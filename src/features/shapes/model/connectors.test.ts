@@ -6,26 +6,24 @@ import { rotateShapes, translateShapes } from './shapeOps'
 
 const shape = (id: string, over: Partial<Shape> = {}): Shape => ({
   id,
-  kind: 'rectangle',
+  shape: 'rectangle',
   x: 0,
   y: 0,
   w: 100,
   h: 50,
   rotation: 0,
   text: '',
-  fill: '#fff',
-  stroke: '#000',
   ...over,
 })
 
 const a = shape('a')
 const b = shape('b', { x: 300 })
-const arrow = createConnector({ x: 50, y: 25, shapeId: 'a' }, { x: 350, y: 25, shapeId: 'b' }, '#000', 'c')
+const arrow = createConnector({ x: 50, y: 25, shapeId: 'a' }, { x: 350, y: 25, shapeId: 'b' }, 'c')
 
 describe('connectors', () => {
   it('finds the outline point toward a target for boxes and ellipses', () => {
     expect(boundaryPoint(a, { x: 500, y: 25 })).toEqual({ x: 100, y: 25 })
-    const p = boundaryPoint(shape('e', { kind: 'ellipse' }), { x: 50, y: -100 })
+    const p = boundaryPoint(shape('e', { shape: 'ellipse' }), { x: 50, y: -100 })
     expect(p.x).toBeCloseTo(50)
     expect(p.y).toBeCloseTo(0)
   })
@@ -42,7 +40,7 @@ describe('connectors', () => {
   })
 
   it('snaps to the slanted edges of a diamond', () => {
-    const d = shape('d', { kind: 'diamond', w: 100, h: 100 })
+    const d = shape('d', { shape: 'diamond', w: 100, h: 100 })
     const p = connectorEndAt([d], { x: 20, y: 20 }, 10)
     expect(p.x).toBeCloseTo(25)
     expect(p.y).toBeCloseTo(25)
@@ -50,8 +48,8 @@ describe('connectors', () => {
   })
 
   it('follows the outline of stars, arrows, cylinders and documents', () => {
-    const at = (kind: Shape['kind'], p: { x: number; y: number }, size = 100) =>
-      connectorEndAt([shape(kind, { kind, w: size, h: size })], p, 10)
+    const at = (type: Shape['shape'], p: { x: number; y: number }, size = 100) =>
+      connectorEndAt([shape(type, { shape: type, w: size, h: size })], p, 10)
     // Star: the notch between the top and upper-right points is empty box space.
     expect(at('star', { x: 70, y: 5 })).toEqual({ x: 70, y: 5 })
     // Block arrow: the shaft is thinner than the box.
@@ -65,14 +63,14 @@ describe('connectors', () => {
   })
 
   it('keeps anchored ends at the same spot when the other end moves', () => {
-    const pinned = createConnector({ x: 100, y: 10, shapeId: 'a', anchor: { x: 1, y: 0.2 } }, { x: 500, y: 400 }, '#000', 'p')
+    const pinned = createConnector({ x: 100, y: 10, shapeId: 'a', anchor: { x: 1, y: 0.2 } }, { x: 500, y: 400 }, 'p')
     const [, c] = syncConnectors([a, setConnectorEnd([pinned], 'p', 'end', { x: -300, y: -300 })[0]])
     expect(c.start).toMatchObject({ x: 100, y: 10 })
   })
 
   it('anchors scale and rotate with their shape', () => {
-    const pinned = createConnector({ x: 0, y: 0, shapeId: 'a', anchor: { x: 1, y: 0.5 } }, { x: 500, y: 25 }, '#000', 'p')
-    const [, c] = syncConnectors([shape('a', { w: 200, rotation: Math.PI / 2 }), pinned])
+    const pinned = createConnector({ x: 0, y: 0, shapeId: 'a', anchor: { x: 1, y: 0.5 } }, { x: 500, y: 25 }, 'p')
+    const [, c] = syncConnectors([shape('a', { w: 200, rotation: 90 }), pinned])
     expect(c.start?.x).toBeCloseTo(100)
     expect(c.start?.y).toBeCloseTo(125)
   })
@@ -115,7 +113,7 @@ describe('connectors', () => {
   })
 
   it('moves free ends with translate and rotate, keeping rotation at 0', () => {
-    const free = createConnector({ x: 0, y: 0 }, { x: 100, y: 0 }, '#000', 'f')
+    const free = createConnector({ x: 0, y: 0 }, { x: 100, y: 0 }, 'f')
     const [moved] = translateShapes([free], new Set(['f']), 10, 5)
     expect(moved.start).toEqual({ x: 10, y: 5 })
     const [turned] = rotateShapes([free], new Set(['f']), { x: 0, y: 0 }, Math.PI / 2)

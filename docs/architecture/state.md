@@ -48,6 +48,7 @@ History is capped at 200 steps.
 - `document/model/storage.ts`. Keys: `miroclone:board` (shapes) and `miroclone:title`.
 - The store subscribes and saves on change. Writes are best-effort, and storage failures are ignored.
 - Format: `{ version: SCHEMA_VERSION, shapes }`. `parseStoredShapes` migrates older data step by step via
-  `MIGRATIONS[n]` (n → n+1). Version 0 = the legacy bare array without `rotation`. Version 2 added connectors, version 3 connector `anchor`s.
+  `MIGRATIONS[n]` (n → n+1). Version 0 = the legacy bare array without `rotation`. Version 2 added connectors, version 3 connector `anchor`s,
+  version 4 renamed `kind` → `shape`, replaced hex `fill`/`stroke` with `style` color tokens and switched rotation to degrees.
 - **Changing `Shape`:** bump `SCHEMA_VERSION`, add `MIGRATIONS[old]`, add a test in `storage.test.ts`
   (skill `change-persisted-schema`).

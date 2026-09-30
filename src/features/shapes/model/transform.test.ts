@@ -29,8 +29,8 @@ describe('resizeRotated', () => {
   })
 
   it('keeps the opposite corner pinned in world space when rotated', () => {
-    const s = { ...box, rotation: deg(30) } as Shape
-    const worldCorner = (b: typeof box) => rotatePoint({ x: b.x, y: b.y }, centerOf(b), s.rotation)
+    const s = { ...box, rotation: 30 } as Shape
+    const worldCorner = (b: typeof box) => rotatePoint({ x: b.x, y: b.y }, centerOf(b), deg(s.rotation))
     const before = worldCorner(s)
     const after = worldCorner(resizeRotated(s, 'se', { x: 40, y: 25 }, false))
     expect(after.x).toBeCloseTo(before.x)

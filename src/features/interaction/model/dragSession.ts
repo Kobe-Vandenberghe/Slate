@@ -1,4 +1,4 @@
-import type { ConnectorEnd, ConnectorEndName, Shape, ResizeHandle, ShapeKind } from '@/features/shapes'
+import type { ConnectorEnd, ConnectorEndName, Shape, ResizeHandle, ShapeType } from '@/features/shapes'
 import type { Camera } from '@/features/viewport'
 import type { Bounds, Vec } from '@/shared/math'
 
@@ -36,7 +36,7 @@ export type RotateSession = {
   type: 'rotate'
   center: Vec
   startAngle: number
-  /** Rotation of the single selected shape (0 for groups); snapping applies to the absolute angle. */
+  /** Rotation of the single selected shape in radians (0 for groups); snapping applies to the absolute angle. */
   baseRotation: number
   ids: ReadonlySet<string>
   snapshot: Shape[]
@@ -46,7 +46,7 @@ export type MarqueeSession = { type: 'marquee'; startWorld: Vec; baseSelection: 
 
 export type CreateSession = {
   type: 'create'
-  kind: ShapeKind
+  shape: ShapeType
   startWorld: Vec
   startScreen: Vec
   /** Assigned once the drag passes the threshold; a plain click places a default-sized shape instead. */

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { centerOf, clamp, intersects, normalizeAngle, rectFromPoints, rotatePoint } from '@/shared/math'
+import { centerOf, clamp, intersects, normalizeDegrees, rectFromPoints, rotatePoint, toDegrees, toRadians } from '@/shared/math'
 
 describe('shared/math', () => {
   it('clamps', () => {
@@ -14,8 +14,9 @@ describe('shared/math', () => {
   })
 
   it('normalizes angles into [0, 2π)', () => {
-    expect(normalizeAngle(-Math.PI / 2)).toBeCloseTo((3 * Math.PI) / 2)
-    expect(normalizeAngle(Math.PI * 4)).toBeCloseTo(0)
+    expect(normalizeDegrees(-90)).toBe(270)
+    expect(normalizeDegrees(720)).toBe(0)
+    expect(toDegrees(toRadians(45))).toBeCloseTo(45)
   })
 
   it('builds rects from any two corners', () => {

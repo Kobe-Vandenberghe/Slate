@@ -11,7 +11,7 @@ import {
   removeShapes,
   reorderShapes,
 } from '@/features/shapes'
-import type { PaletteColor, Shape, ShapeKind } from '@/features/shapes'
+import type { PaletteColor, Shape, ShapeType } from '@/features/shapes'
 import { useEditingStore } from '@/features/text-editing'
 import { useToolStore } from '@/features/tools'
 import { useViewportStore } from '@/features/viewport'
@@ -29,22 +29,22 @@ let clipboard: Shape[] = []
 const doc = () => useDocumentStore.getState()
 const selectedIdSet = () => new Set(useSelectionStore.getState().selectedIds)
 
-/** Color a newly created shape of `kind` gets. */
-export const colorFor = (kind: ShapeKind): PaletteColor =>
-  kind === 'sticky' ? useToolStore.getState().stickyColor : DEFAULT_SHAPE_COLOR
+/** Color a newly created shape of `type` gets. */
+export const colorFor = (type: ShapeType): PaletteColor =>
+  type === 'sticky' ? useToolStore.getState().stickyColor : DEFAULT_SHAPE_COLOR
 
 /** Selects a just-created shape, opens its editor if it's text-first, and returns to the select tool. */
-export function finishCreation(id: string, kind: ShapeKind) {
-  if (opensEditorOnCreate(kind)) useEditingStore.getState().startEditing(id)
+export function finishCreation(id: string, type: ShapeType) {
+  if (opensEditorOnCreate(type)) useEditingStore.getState().startEditing(id)
   else useSelectionStore.getState().select([id])
   useToolStore.getState().setTool('select')
 }
 
 /** Adds a default-sized shape at world point `at` (one undo step). */
-export function placeShape(kind: ShapeKind, at: Vec, color: PaletteColor = colorFor(kind)) {
-  const shape = createShape(kind, placementBounds(kind, at), color)
+export function placeShape(type: ShapeType, at: Vec, color: PaletteColor = colorFor(type)) {
+  const shape = createShape(type, placementBounds(type, at), color)
   doc().update((shapes) => [...shapes, shape])
-  finishCreation(shape.id, kind)
+  finishCreation(shape.id, type)
 }
 
 function insertCopies(source: Shape[]) {
@@ -79,7 +79,7 @@ export const selectAll = () => useSelectionStore.getState().select(doc().shapes.
 
 export function recolorSelection(color: PaletteColor) {
   const ids = selectedIdSet()
-  doc().update((shapes) => recolorShapes(shapes, ids, color))
+  doc().update((shapes) => recolorShapes(shapes, ids, color.token))
 }
 
 export function reorderSelection(toFront: boolean) {
