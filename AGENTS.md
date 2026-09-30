@@ -98,3 +98,4 @@ The shared layer (`src/shared/math`, `src/shared/ui`, `src/shared/styles`) holds
 | `session-wrap-up` | Finishing a task: journal, lessons, skill retro, verification |
 | `verify-ui-change` | Checking a visual or interaction change in the browser |
 | `write-skill` | A skill was wrong/incomplete, or a workflow repeated without a skill |
+| `archdoc-language` | Reading, generating or editing a board as ArchDoc (`.slate.json`, stored doc, AI YAML) |
