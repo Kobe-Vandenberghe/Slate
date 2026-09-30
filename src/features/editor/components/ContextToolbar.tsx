@@ -1,5 +1,5 @@
 import { useDocumentStore } from '@/features/document'
-import { SHAPE_COLORS, STICKY_COLORS, diagramBounds } from '@/features/shapes'
+import { SHAPE_COLORS, STICKY_COLORS, diagramBounds, isFrame } from '@/features/shapes'
 import { useSelection } from '@/features/selection'
 import { useEditingStore } from '@/features/text-editing'
 import { useViewportStore, worldToScreen } from '@/features/viewport'
@@ -7,6 +7,7 @@ import { clamp } from '@/shared/math'
 import { ColorSwatches, Icon, ToolButton } from '@/shared/ui'
 import {
   deleteSelection,
+  deleteSelectionWithContents,
   duplicateSelection,
   recolorSelection,
   reorderSelection,
@@ -42,6 +43,7 @@ export function ContextToolbar({ hidden }: { hidden: boolean }) {
   const y = above ? topLeft.y - GAP_ABOVE : topLeft.y + height + GAP_BELOW
   const onlyStickies =
     !selection.connections.length && selection.elements.every((s) => s.shape === 'sticky')
+  const hasFrame = selection.elements.some(isFrame)
 
   return (
     <div
@@ -61,9 +63,14 @@ export function ContextToolbar({ hidden }: { hidden: boolean }) {
       <ToolButton size="small" title="Send to back ([)" onClick={() => reorderSelection(false)}>
         <Icon name="sendToBack" />
       </ToolButton>
-      <ToolButton size="small" title="Delete (Del)" onClick={deleteSelection}>
+      <ToolButton size="small" title={hasFrame ? 'Delete, keep contents (Del)' : 'Delete (Del)'} onClick={deleteSelection}>
         <Icon name="trash" />
       </ToolButton>
+      {hasFrame && (
+        <ToolButton size="small" title="Delete with contents (Shift+Del)" onClick={deleteSelectionWithContents}>
+          <Icon name="trashFrame" />
+        </ToolButton>
+      )}
     </div>
   )
 }

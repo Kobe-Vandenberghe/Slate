@@ -24,7 +24,7 @@ export {
 export { createShape, placementBounds } from './model/shapeFactory'
 
 // Pure element-list operations (return the same array when nothing changed)
-export { resizeShape, setShapeHeight, setShapeText } from './model/shapeOps'
+export { setShapeHeight, setShapeText } from './model/shapeOps'
 
 // Pure diagram operations (elements + connections; return the same diagram when nothing changed)
 export {
@@ -38,10 +38,21 @@ export {
   recolorDiagram,
   removeFromDiagram,
   reorderDiagram,
+  resizeElement,
   rotateDiagram,
   scaleDiagram,
   translateDiagram,
 } from './model/diagram'
+
+// Frames (children are frame-relative; geometry uses the world view)
+export {
+  assignFrames,
+  captureIntoFrame,
+  childrenOf,
+  isFrame,
+  releaseChildren,
+  worldElements,
+} from './model/frames'
 
 // Connections (arrows)
 export {
@@ -61,6 +72,7 @@ export { resizeBounds, resizeRotated, snapRotation } from './model/transform'
 
 // Rendering
 export { ConnectionView } from './components/ConnectionView'
+export { FrameView } from './components/FrameView'
 export { ShapeGeometry } from './components/ShapeGeometry'
 export { ShapePreview } from './components/ShapePreview'
 export { ShapeView } from './components/ShapeView'

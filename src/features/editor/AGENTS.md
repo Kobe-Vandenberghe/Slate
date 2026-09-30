@@ -2,8 +2,9 @@
 
 ## Owns
 - **Editor commands** (`model/commands.ts`): plain functions for user-level actions that span stores.
-  `placeShape`, `finishCreation`, `colorFor`, `duplicateSelection`, `copySelection`, `paste`,
-  `deleteSelection`, `selectAll`, `recolorSelection`, `reorderSelection`, `zoomToContent`.
+  `placeShape`, `finishCreation`, `colorFor`, `withNewElement`, `duplicateSelection`, `copySelection`, `paste`,
+  `deleteSelection` (releases frame contents), `deleteSelectionWithContents`, `selectAll`, `recolorSelection`,
+  `reorderSelection`, `zoomToContent`.
 - The in-memory clipboard.
 - `ContextToolbar`: floats above the selection (colors, duplicate, bring to front/send to back, delete).
 
@@ -22,6 +23,8 @@ The commands above and `ContextToolbar`.
 
 ## Gotchas
 - `paste` stores the pasted copies back into the clipboard, so repeated pastes cascade by `PASTE_OFFSET`.
+- New elements go through `withNewElement`: frames at the back, anything else joins the frame it lands in.
+  Pasted copies are re-assigned to frames too (the clipboard holds board coordinates for orphaned children).
 - `finishCreation` selects the shape, opens the editor for text-first kinds and returns the tool to `select`.
 - `ContextToolbar` hides while editing text and while `hidden` is set (the app passes `pointer.interacting`).
   It flips below the selection when there is less than `MIN_SPACE_ABOVE` px above it.

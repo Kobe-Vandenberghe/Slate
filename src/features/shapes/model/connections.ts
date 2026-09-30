@@ -2,6 +2,7 @@ import { ORIGIN, centerOf, clamp, dist, rectFromPoints, rotatePoint, toRadians }
 import type { Bounds, Vec } from '@/shared/math'
 import { isAttached } from '@/features/archdoc'
 import type { AttachedEnd, Connection, ConnectionEnd } from '@/features/archdoc'
+import { isFrame, worldElements } from './frames'
 import type { Diagram, Shape } from './types'
 
 /*
@@ -158,14 +159,16 @@ const anchoredAt = (s: Shape, local: Vec): AttachedEnd => ({ element: s.id, anch
 /**
  * Where a connection end dropped at world point `p` attaches: pinned to the nearest outline point when
  * within `snap` of the topmost element's edge, floating when deep inside it, otherwise a free point.
- * `otherElementId` (the opposite end's element) never gets a floating end, which would collapse the arrow.
+ * `elements` are world-positioned and topmost last (`worldElements(d).ordered`). Frames only catch their edge:
+ * their inside is a container, not a target. `otherElementId` (the opposite end's element) never gets a floating
+ * end, which would collapse the arrow.
  */
 export function connectionEndAt(elements: Shape[], p: Vec, snap: number, otherElementId?: string): ConnectionEnd {
   for (let i = elements.length - 1; i >= 0; i--) {
     const s = elements[i]
     const near = nearestOnOutline(s, p)
     if (near.distance <= snap) return anchoredAt(s, near.local)
-    if (containsPoint(s, p)) return s.id === otherElementId ? { x: p.x, y: p.y } : { element: s.id }
+    if (!isFrame(s) && containsPoint(s, p)) return s.id === otherElementId ? { x: p.x, y: p.y } : { element: s.id }
   }
   return { x: p.x, y: p.y }
 }
@@ -204,7 +207,7 @@ const pathCache = new WeakMap<Diagram, ReadonlyMap<string, ConnectionPath>>()
 export function connectionPaths(d: Diagram): ReadonlyMap<string, ConnectionPath> {
   let paths = pathCache.get(d)
   if (!paths) {
-    const byId = new Map(d.elements.map((e) => [e.id, e]))
+    const { byId } = worldElements(d)
     paths = new Map(d.connections.map((c) => [c.id, connectionPath(c, byId)]))
     pathCache.set(d, paths)
   }
@@ -233,9 +236,10 @@ function replaceConnection(d: Diagram, id: string, fn: (c: Connection) => Connec
 export function pinConnectionEnds(d: Diagram, id: string): Diagram {
   const path = connectionPaths(d).get(id)
   if (!path) return d
+  const { byId } = worldElements(d)
   const pin = (end: ConnectionEnd, at: Vec): ConnectionEnd => {
     if (!isAttached(end) || end.anchor) return end
-    const s = d.elements.find((e) => e.id === end.element)
+    const s = byId.get(end.element)
     return s ? anchoredAt(s, toLocal(s, at)) : end
   }
   return replaceConnection(d, id, (c) => {

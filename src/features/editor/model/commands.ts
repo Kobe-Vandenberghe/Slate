@@ -3,17 +3,20 @@ import { getSelection, useSelectionStore } from '@/features/selection'
 import {
   DEFAULT_SHAPE_COLOR,
   EMPTY_DIAGRAM,
+  assignFrames,
+  childrenOf,
   cloneDiagram,
   createShape,
   diagramBounds,
   extractSelection,
+  isFrame,
   opensEditorOnCreate,
   placementBounds,
   recolorDiagram,
   removeFromDiagram,
   reorderDiagram,
 } from '@/features/shapes'
-import type { Diagram, PaletteColor, ShapeType } from '@/features/shapes'
+import type { Diagram, PaletteColor, Shape, ShapeType } from '@/features/shapes'
 import { useEditingStore } from '@/features/text-editing'
 import { useToolStore } from '@/features/tools'
 import { useViewportStore } from '@/features/viewport'
@@ -46,21 +49,33 @@ export function finishCreation(id: string, type?: ShapeType) {
   useToolStore.getState().setTool('select')
 }
 
+/**
+ * Adds a new element placed in world coordinates: frames go to the back of the board, anything else joins the
+ * frame it lands in. Pure, so gestures can reuse it on their snapshot.
+ */
+export function withNewElement(d: Diagram, shape: Shape): Diagram {
+  if (isFrame(shape)) return { ...d, elements: [shape, ...d.elements] }
+  return assignFrames({ ...d, elements: [...d.elements, shape] }, new Set([shape.id]))
+}
+
 /** Adds a default-sized shape at world point `at` (one undo step). */
 export function placeShape(type: ShapeType, at: Vec, color: PaletteColor = colorFor(type)) {
   const shape = createShape(type, placementBounds(type, at), color)
-  doc().update((d) => ({ ...d, elements: [...d.elements, shape] }))
+  doc().update((d) => withNewElement(d, shape))
   finishCreation(shape.id, type)
 }
 
 function insertCopies(source: Diagram): Diagram {
   if (!source.elements.length && !source.connections.length) return source
   const copies = cloneDiagram(source, PASTE_OFFSET)
-  doc().update((d) => ({
-    elements: [...d.elements, ...copies.elements],
-    connections: [...d.connections, ...copies.connections],
-  }))
-  useSelectionStore.getState().select([...copies.elements, ...copies.connections].map((x) => x.id))
+  const ids = [...copies.elements, ...copies.connections].map((x) => x.id)
+  doc().update((d) =>
+    assignFrames(
+      { elements: [...d.elements, ...copies.elements], connections: [...d.connections, ...copies.connections] },
+      new Set(ids),
+    ),
+  )
+  useSelectionStore.getState().select(ids)
   return copies
 }
 
@@ -77,10 +92,19 @@ export const paste = () => {
   clipboard = insertCopies(clipboard)
 }
 
+/** Deletes the selection. Children of a deleted frame stay on the board. */
 export function deleteSelection() {
   const ids = selectedIdSet()
   if (!ids.size) return
   doc().update((d) => removeFromDiagram(d, ids))
+  useSelectionStore.getState().clear()
+}
+
+/** Deletes the selection including everything inside selected frames. */
+export function deleteSelectionWithContents() {
+  const ids = selectedIdSet()
+  if (!ids.size) return
+  doc().update((d) => removeFromDiagram(d, new Set([...ids, ...childrenOf(d, ids)])))
   useSelectionStore.getState().clear()
 }
 

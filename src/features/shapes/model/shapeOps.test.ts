@@ -4,7 +4,6 @@ import {
   recolorShapes,
   reorderShapes,
   rotateShapes,
-  scaleShapes,
   setShapeHeight,
   setShapeText,
   translateShapes,
@@ -28,11 +27,6 @@ describe('shapeOps', () => {
     const [a, b] = translateShapes([shape('a'), shape('b')], new Set(['a']), 5, 7)
     expect(a).toMatchObject({ x: 5, y: 7 })
     expect(b).toMatchObject({ x: 0, y: 0 })
-  })
-
-  it('scales a group between bounding boxes', () => {
-    const [a] = scaleShapes([shape('a', { x: 10, y: 10 })], new Set(['a']), { x: 0, y: 0, w: 110, h: 60 }, { x: 0, y: 0, w: 220, h: 120 })
-    expect(a).toMatchObject({ x: 20, y: 20, w: 200, h: 100 })
   })
 
   it('rotates around a center and accumulates rotation in degrees', () => {

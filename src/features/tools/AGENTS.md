@@ -2,7 +2,7 @@
 
 ## Owns
 - `useToolStore`: the active `tool` and the `stickyColor` used for the next sticky note.
-- The `Tool` type (`'select' | 'hand' | ShapeType`), `TOOL_SHORTCUTS` and `isShapeTool`.
+- The `Tool` type (`'select' | 'hand' | 'connector' | ShapeType`, where `frame` is tool `F`), `TOOL_SHORTCUTS` and `isShapeTool`.
 - `Toolbar`, the left tool rail (select, hand, text, arrow, library toggle).
 
 ## Public API

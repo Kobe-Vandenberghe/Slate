@@ -3,6 +3,7 @@ import { useDocumentStore } from '@/features/document'
 import {
   copySelection,
   deleteSelection,
+  deleteSelectionWithContents,
   duplicateSelection,
   paste,
   reorderSelection,
@@ -39,7 +40,7 @@ function modifiedCommand(key: string, shift: boolean): (() => void) | undefined 
 /**
  * Global keyboard shortcuts (ignored while typing in inputs/text editors):
  * - Ctrl/⌘: Z undo, Shift+Z / Y redo, A select all, C/V copy/paste, D duplicate, +/−/0 zoom
- * - Delete/Backspace delete, Enter edit text, Escape deselect, ] / [ front/back, Shift+1 fit
+ * - Delete/Backspace delete (Shift: frames with their contents), Enter edit text, Escape deselect, ] / [ front/back, Shift+1 fit
  * - Tool keys from `TOOL_SHORTCUTS`. Space-to-pan lives in `useSpaceHeld`.
  */
 export function useKeyboardShortcuts() {
@@ -61,7 +62,8 @@ export function useKeyboardShortcuts() {
         case 'Delete':
         case 'Backspace':
           e.preventDefault()
-          deleteSelection()
+          if (e.shiftKey) deleteSelectionWithContents()
+          else deleteSelection()
           return
         case 'Escape':
           useSelectionStore.getState().clear()

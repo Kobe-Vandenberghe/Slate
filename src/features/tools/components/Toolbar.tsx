@@ -27,6 +27,9 @@ export function Toolbar({ libraryOpen, onToggleLibrary }: ToolbarProps) {
       <ToolButton title="Arrow (L)" active={tool === 'connector'} onClick={() => setTool('connector')}>
         <Icon name="connector" />
       </ToolButton>
+      <ToolButton title="Frame (F)" active={tool === 'frame'} onClick={() => setTool('frame')}>
+        <Icon name="frame" />
+      </ToolButton>
       <ToolButton title="Shapes & sticky notes" active={libraryOpen || isShapeTool(tool)} onClick={onToggleLibrary}>
         <Icon name="shapes" />
       </ToolButton>

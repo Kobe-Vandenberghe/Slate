@@ -13,8 +13,9 @@ export const TOOL_SHORTCUTS: Record<string, Tool> = {
   o: 'ellipse',
   d: 'diamond',
   l: 'connector',
+  f: 'frame',
 }
 
-/** True for tools that draw a library shape (everything except select/hand/text/connector). */
+/** True for tools that draw a library shape (everything except select/hand/text/connector/frame). */
 export const isShapeTool = (tool: Tool) =>
-  tool !== 'select' && tool !== 'hand' && tool !== 'text' && tool !== 'connector'
+  tool !== 'select' && tool !== 'hand' && tool !== 'text' && tool !== 'connector' && tool !== 'frame'

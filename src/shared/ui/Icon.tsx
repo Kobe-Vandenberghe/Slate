@@ -8,6 +8,7 @@ const ICONS = {
   ),
   text: <path d="M5 6V4h14v2M12 4v16M9 20h6" />,
   connector: <path d="M5 19L19 5M11 5h8v8" />,
+  frame: <path d="M7 3v18M17 3v18M3 7h18M3 17h18" />,
   shapes: (
     <>
       <rect x="3" y="3" width="8" height="8" rx="1" />
@@ -47,6 +48,12 @@ const ICONS = {
     </>
   ),
   trash: <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />,
+  trashFrame: (
+    <>
+      <path d="M4 7h16M6 7l1 13h10l1-13M9 7V4h6v3" />
+      <rect x="9.5" y="11" width="5" height="5" rx="0.5" />
+    </>
+  ),
 } satisfies Record<string, ReactNode>
 
 export type IconName = keyof typeof ICONS

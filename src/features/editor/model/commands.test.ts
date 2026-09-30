@@ -7,6 +7,7 @@ import { STICKY_COLORS, createConnection } from '@/features/shapes'
 import {
   copySelection,
   deleteSelection,
+  deleteSelectionWithContents,
   duplicateSelection,
   paste,
   placeShape,
@@ -87,6 +88,29 @@ describe('editor commands', () => {
     expect(copy.from).toEqual({ element: copiedA.id })
     expect(copy.to).toMatchObject({ x: expect.any(Number), y: expect.any(Number) })
     expect(selected()).toEqual([copiedA.id, copy.id])
+  })
+
+  it('places frames at the back, drops new shapes into them, and deletes with or without contents', () => {
+    placeShape('rectangle', { x: 5000, y: 5000 })
+    placeShape('frame', { x: 0, y: 0 })
+    const frame = shapes()[0]
+    expect(frame.shape).toBe('frame')
+    placeShape('sticky', { x: 10, y: 10 })
+    const sticky = shapes().at(-1)!
+    expect(sticky.frame).toBe(frame.id)
+    expect(sticky.x).toBeCloseTo(10 - 90 - frame.x)
+
+    useSelectionStore.getState().select([frame.id])
+    deleteSelection()
+    expect(shapes().map((s) => s.id)).toEqual([shapes()[0].id, sticky.id])
+    expect(shapes()[1]).not.toHaveProperty('frame')
+
+    useDocumentStore.getState().undo()
+    useSelectionStore.getState().select([frame.id])
+    deleteSelectionWithContents()
+    expect(shapes()).toHaveLength(1)
+    useDocumentStore.getState().undo()
+    expect(shapes()).toHaveLength(3)
   })
 
   it('deleting an element keeps connections, detached where they were, and undo restores both', () => {

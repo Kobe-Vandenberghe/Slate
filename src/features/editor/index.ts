@@ -6,6 +6,7 @@ export {
   colorFor,
   copySelection,
   deleteSelection,
+  deleteSelectionWithContents,
   duplicateSelection,
   finishCreation,
   paste,
@@ -13,6 +14,7 @@ export {
   recolorSelection,
   reorderSelection,
   selectAll,
+  withNewElement,
   zoomToContent,
 } from './model/commands'
 export { ContextToolbar } from './components/ContextToolbar'

@@ -1,44 +1,20 @@
 import { centerOf, normalizeDegrees, rotatePoint, toDegrees } from '@/shared/math'
-import type { Bounds, Vec } from '@/shared/math'
+import type { Vec } from '@/shared/math'
 import type { ColorToken } from '@/features/archdoc'
-import { resizeRotated } from './transform'
-import type { ResizeHandle, Shape } from './types'
+import type { Shape } from './types'
 
 /*
  * Pure operations on the element list. Each returns a new array, or the SAME array when nothing
  * changed — the document store relies on that identity to skip no-op undo steps.
- * Ops over elements *and* connections live in `diagram.ts`.
+ * Ops over elements *and* connections (and anything frame-aware) live in `diagram.ts`.
  */
 
 type Ids = ReadonlySet<string>
 
-const MIN_SHAPE_SIZE = 4
+export const MIN_SHAPE_SIZE = 4
 
 export const translateShapes = (shapes: Shape[], ids: Ids, dx: number, dy: number) =>
   shapes.map((s) => (ids.has(s.id) ? { ...s, x: s.x + dx, y: s.y + dy } : s))
-
-/** Scales a group of shapes from one bounding box to another (multi-selection resize). */
-export function scaleShapes(shapes: Shape[], ids: Ids, from: Bounds, to: Bounds) {
-  const sx = to.w / Math.max(from.w, 1)
-  const sy = to.h / Math.max(from.h, 1)
-  return shapes.map((s) =>
-    ids.has(s.id)
-      ? {
-          ...s,
-          x: to.x + (s.x - from.x) * sx,
-          y: to.y + (s.y - from.y) * sy,
-          w: Math.max(s.w * sx, MIN_SHAPE_SIZE),
-          h: Math.max(s.h * sy, MIN_SHAPE_SIZE),
-        }
-      : s,
-  )
-}
-
-/** Resizes one shape by dragging `handle` by `delta` (world units), respecting its rotation. */
-export function resizeShape(shapes: Shape[], target: Shape, handle: ResizeHandle, delta: Vec, keepAspect: boolean) {
-  const next = resizeRotated(target, handle, delta, keepAspect)
-  return shapes.map((s) => (s.id === target.id ? { ...s, ...next } : s))
-}
 
 /** Rotates shapes by `delta` radians around `center`, orbiting their positions too. */
 export function rotateShapes(shapes: Shape[], ids: Ids, center: Vec, delta: number) {

@@ -1,24 +1,26 @@
 import { useRef, useState } from 'react'
 import type { PointerEvent as ReactPointerEvent } from 'react'
 import { useDocumentStore } from '@/features/document'
-import { colorFor, finishCreation, placeShape } from '@/features/editor'
+import { colorFor, finishCreation, placeShape, withNewElement } from '@/features/editor'
 import { getSelection, useSelectionStore } from '@/features/selection'
 import {
+  assignFrames,
+  captureIntoFrame,
   connectionEndAt,
   createConnection,
   createShape,
   diagramBounds,
   endElement,
   idsInRect,
-  mapElements,
   pinConnectionEnds,
   resizeBounds,
-  resizeShape,
+  resizeElement,
   rotateDiagram,
   scaleDiagram,
   setConnectionEnd,
   snapRotation,
   translateDiagram,
+  worldElements,
 } from '@/features/shapes'
 import type { ResizeHandle } from '@/features/shapes'
 import { useEditingStore } from '@/features/text-editing'
@@ -110,7 +112,7 @@ export function usePointerInteractions(spaceHeld: boolean) {
 
     if (tool === 'connector') {
       const snapshot = doc().diagram
-      const from = connectionEndAt(snapshot.elements, world, snapDistance())
+      const from = connectionEndAt(worldElements(snapshot).ordered, world, snapDistance())
       begin(e, { type: 'connect', startWorld: world, startScreen: screen, from, connectionId: null, snapshot })
       return
     }
@@ -168,7 +170,15 @@ export function usePointerInteractions(spaceHeld: boolean) {
         ...common,
       }
     }
-    return { type: 'resize', handle: handle as ResizeHandle, startWorld: world, bounds, single, ...common }
+    return {
+      type: 'resize',
+      handle: handle as ResizeHandle,
+      startWorld: world,
+      bounds,
+      // Resizing edits stored coordinates; the drag delta is the same in a frame's space.
+      single: single && snapshot.elements.find((e) => e.id === single.id)!,
+      ...common,
+    }
   }
 
   /** Press on a shape: update the selection (Shift toggles) and get ready to move it. */
@@ -241,7 +251,7 @@ export function usePointerInteractions(spaceHeld: boolean) {
     const delta = { x: world.x - s.startWorld.x, y: world.y - s.startWorld.y }
     doc().update(() => {
       const { single } = s
-      if (single) return mapElements(s.snapshot, (elements) => resizeShape(elements, single, s.handle, delta, keepAspect))
+      if (single) return resizeElement(s.snapshot, single, s.handle, delta, keepAspect)
       const next = resizeBounds(s.bounds, s.handle, delta.x, delta.y, keepAspect)
       return scaleDiagram(s.snapshot, s.ids, s.bounds, next)
     }, false)
@@ -266,7 +276,7 @@ export function usePointerInteractions(spaceHeld: boolean) {
     const isNew = !s.shapeId
     s.shapeId ??= crypto.randomUUID()
     const shape = createShape(s.shape, rectFromPoints(s.startWorld, world), colorFor(s.shape), s.shapeId)
-    doc().update(() => ({ ...s.snapshot, elements: [...s.snapshot.elements, shape] }), false)
+    doc().update(() => withNewElement(s.snapshot, shape), false)
     if (isNew) {
       useSelectionStore.getState().select([shape.id])
       setInteracting(true)
@@ -277,7 +287,7 @@ export function usePointerInteractions(spaceHeld: boolean) {
     if (!s.connectionId && dist(screen, s.startScreen) < CREATE_THRESHOLD) return
     const isNew = !s.connectionId
     s.connectionId ??= crypto.randomUUID()
-    const to = connectionEndAt(s.snapshot.elements, world, snapDistance(), endElement(s.from))
+    const to = connectionEndAt(worldElements(s.snapshot).ordered, world, snapDistance(), endElement(s.from))
     const connection = createConnection(s.from, to, s.connectionId)
     doc().update(() => ({ ...s.snapshot, connections: [...s.snapshot.connections, connection] }), false)
     if (isNew) {
@@ -289,7 +299,7 @@ export function usePointerInteractions(spaceHeld: boolean) {
   function dragEndpoint(s: EndpointSession, world: Vec) {
     const connection = s.snapshot.connections.find((c) => c.id === s.connectionId)
     const other = connection?.[s.which === 'from' ? 'to' : 'from']
-    const end = connectionEndAt(s.snapshot.elements, world, snapDistance(), other && endElement(other))
+    const end = connectionEndAt(worldElements(s.snapshot).ordered, world, snapDistance(), other && endElement(other))
     setInteracting(true)
     doc().update(() => setConnectionEnd(s.snapshot, s.connectionId, s.which, end), false)
   }
@@ -308,6 +318,9 @@ export function usePointerInteractions(spaceHeld: boolean) {
         setPanning(false)
         break
       case 'move':
+        if (session.started) doc().update((d) => assignFrames(d, session.ids), false)
+        doc().checkpoint(session.snapshot)
+        break
       case 'resize':
       case 'rotate':
         doc().checkpoint(session.snapshot)
@@ -321,8 +334,10 @@ export function usePointerInteractions(spaceHeld: boolean) {
         break
       case 'create':
         if (session.shapeId) {
+          const id = session.shapeId
+          if (session.shape === 'frame') doc().update((d) => captureIntoFrame(d, id), false)
           doc().checkpoint(session.snapshot)
-          finishCreation(session.shapeId, session.shape)
+          finishCreation(id, session.shape)
         } else {
           placeShape(session.shape, session.startWorld)
         }

@@ -20,11 +20,13 @@ export const SHAPE_CATALOG: CatalogItem[] = [
 
 const TEXT_SIZE = { w: 220, h: 32 }
 const STICKY_SIZE = { w: 180, h: 180 }
+const FRAME_SIZE = { w: 480, h: 320 }
 const FALLBACK_SIZE = { w: 160, h: 100 }
 
 export function defaultSize(type: ShapeType): { w: number; h: number } {
   if (type === 'text') return TEXT_SIZE
   if (type === 'sticky') return STICKY_SIZE
+  if (type === 'frame') return FRAME_SIZE
   return SHAPE_CATALOG.find((c) => c.shape === type) ?? FALLBACK_SIZE
 }
 

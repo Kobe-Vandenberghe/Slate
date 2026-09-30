@@ -1,5 +1,5 @@
 import { useDocumentStore } from '@/features/document'
-import { connectionPaths, diagramBounds } from '@/features/shapes'
+import { connectionPaths, diagramBounds, isFrame } from '@/features/shapes'
 import { useSelection } from '../hooks/useSelection'
 import { ConnectionHandles } from './ConnectionHandles'
 import { SelectionHandles } from './SelectionHandles'
@@ -56,7 +56,7 @@ export function SelectionOverlay({ zoom, showHandles }: SelectionOverlayProps) {
           transform: `rotate(${frame.rotation}deg)`,
         }}
       >
-        {showHandles && <SelectionHandles zoom={zoom} border={border} />}
+        {showHandles && <SelectionHandles zoom={zoom} border={border} rotatable={!single || !isFrame(single)} />}
       </div>
     </>
   )

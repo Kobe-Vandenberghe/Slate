@@ -3,7 +3,8 @@
 ## Owns
 - `useSelectionStore`: `selectedIds` (element **and** connection ids), `select(ids)`, `clear()`.
 - Derived reads: `useSelection()` (hook) and `getSelection()` (handlers/commands), both returning
-  `{ ids, elements, connections }`.
+  `{ ids, elements, connections }`. `elements` are **world-positioned** (`worldElements`). To edit geometry, look
+  up the stored element in `diagram.elements`.
 - Selection chrome in world space: `SelectionOverlay` (frame + outlines), `SelectionHandles`, `ConnectionHandles`, `MarqueeBox`.
 
 ## Public API
@@ -20,6 +21,7 @@
   connection paths) plus per-element outlines.
 - Handles are tagged `data-handle="n|s|e|w|ne|nw|se|sw|rotate"`. `interaction` reads those names.
 - A single selected connection gets no frame, only `ConnectionHandles` (`data-handle="from|to"`).
+- A single selected frame gets no rotate knob (`SelectionHandles rotatable={false}`).
 
 ## Gotchas
 - Chrome sizes (border, handles, rotate stem) are divided by zoom to stay constant on screen.
